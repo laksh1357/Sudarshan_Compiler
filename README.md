@@ -2,7 +2,7 @@
 
 [![Compiler Design Laboratory](https://img.shields.io/badge/Course-Compiler_Design_Laboratory-1B365D?style=for-the-badge)](https://github.com/laksh1357/MyOWN_Compiler)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Build Status](https://img.shields.io/badge/Tests-22%20Passed-success?style=for-the-badge)](tests/)
+[![Build Status](https://img.shields.io/badge/Tests-45%20Passed-success?style=for-the-badge)](tests/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 
 **Compiler Design Laboratory Individual Project**  
@@ -14,7 +14,7 @@
 
 ## 1. Project Overview
 
-**Sudarshan** is an imperative programming language and an end-to-end compiler pipeline implemented in Python 3.
+**Sudarshan** is an imperative programming language and an end-to-end compiler pipeline implemented in pure Python 3.
 
 The project implements all classic compiler construction phases:
 - **Lexical Analysis**: DFA scanner & location-aware tokenizer ([`src/lexer.py`](src/lexer.py))
@@ -24,18 +24,19 @@ The project implements all classic compiler construction phases:
 - **Intermediate Code Optimization**: Multi-pass constant folding, constant propagation & dead code elimination ([`src/tac_opt.py`](src/tac_opt.py))
 - **Virtual Machine Execution**: Linear TAC quadruples interpreter & runtime VM ([`src/interpreter.py`](src/interpreter.py))
 
-Designed specifically for Compiler Design Laboratory evaluation, the codebase is modular, zero-dependency, type-hinted, and presentation-ready.
+Designed specifically for Compiler Design Laboratory evaluation, the codebase is fully modular, cross-platform, zero-dependency, type-hinted, and presentation-ready.
 
 ---
 
 ## 2. Key Features & Technical Innovations
 
-1. **Multi-Pass Constant Folding & Propagation**: Evaluates complex compile-time arithmetic (`2 + 3 * 4` $\rightarrow$ `14`) and comparison expressions dynamically before Virtual Machine execution.
-2. **Static Branch Pruning & Dead Code Elimination**: Converts constant conditional jumps (`IF_FALSE 0 GOTO L1` $\rightarrow$ `JUMP L1`) and removes unreachable quadruples following unconditional `GOTO` jumps.
+1. **Multi-Pass Constant Folding & Propagation**: Evaluates complex compile-time arithmetic (`2 + 3 * 4` $\rightarrow$ `14`) and comparison expressions dynamically before Virtual Machine execution while safely preserving division-by-zero operations for runtime error handling.
+2. **Static Branch Pruning & Dead Code Elimination**: Converts constant conditional jumps (`IF_FALSE 0 GOTO L1` $\rightarrow$ `JUMP L1`) and removes unreachable quadruples following unconditional `GOTO` jumps across basic blocks.
 3. **Scope Name Mangling for Register Isolation**: Resolves variable shadowing in flat register-based Three-Address Code by appending scope depth suffixes (`x_s1`), preserving lexical block isolation without complex stack frame overhead.
-4. **AST ASCII Visualizer (`dump_ast`)**: Generates clean, hierarchical ASCII tree visualizations of Abstract Syntax Trees directly in terminal without third-party graphing dependencies.
-5. **Zero-Dependency 100% Handwritten 5-Phase Architecture**: Fully handwritten scanner, parser, symbol table manager, TAC IR generator, optimizer pass, and VM interpreter built strictly with Python 3 standard library.
-6. **Interactive Educational CLI Explainer (`--explain`)**: Built-in CLI flag providing step-by-step educational analysis showing transformation metrics across all 5 compiler phases.
+4. **AST ASCII & Graphical Visualization**: Generates clean hierarchical ASCII tree visualizations directly in terminal (`dump_ast`), and optional Graphviz image export (`render_ast_graph`) routed to a clean `output/` directory with automatic fallback handling.
+5. **Cross-Platform Portable Entry Points**: Invokable seamlessly via `./sudarshan` (Linux/macOS executable) or `sudarshan.bat` (Windows CMD/PowerShell), using standard `pathlib.Path` resolution.
+6. **Zero-Dependency 100% Handwritten Architecture**: Fully handwritten scanner, parser, symbol table manager, TAC IR generator, optimizer pass, and VM interpreter built strictly with Python standard library.
+7. **Interactive Educational CLI Explainer (`--explain`)**: Built-in CLI flag providing step-by-step educational analysis showing transformation metrics across all 5 compiler phases.
 
 ---
 
@@ -47,7 +48,7 @@ MyOWN_Compiler/
 │   ├── __init__.py
 │   ├── errors.py                 # Centralized exception hierarchy (SudarshanError)
 │   ├── lexer.py                  # Phase 1: Scanner & Tokenizer
-│   ├── ast_nodes.py              # Phase 2: AST Node definitions & dump_ast() dumper
+│   ├── ast_nodes.py              # Phase 2: AST Node definitions & visualizer
 │   ├── parser.py                 # Phase 2: LL(1) Recursive Descent Parser
 │   ├── symbol_table.py           # Phase 3: Lexically-scoped Symbol Table
 │   ├── semantic.py               # Phase 3: Static Semantic Analyzer
@@ -55,18 +56,24 @@ MyOWN_Compiler/
 │   ├── tac_opt.py                # Phase 4b: TAC Constant Folding & DCE Optimizer
 │   ├── interpreter.py            # Phase 5: Virtual Machine Interpreter
 │   └── main.py                   # Central CLI Driver & Entry Point
-├── tests/                        # Automated Unittest Test Suite
-│   ├── test_lexer.py             # Lexer unit tests
-│   ├── test_parser.py            # Parser unit tests
-│   ├── test_semantic.py          # Semantic & Symbol Table unit tests
-│   ├── test_tac.py               # TAC generator unit tests
-│   ├── test_optimizer.py         # Constant Folding & DCE unit tests
-│   └── test_interpreter.py       # Virtual Machine execution tests
+├── tests/                        # Comprehensive Automated Test Suite (45 Tests)
+│   ├── test_lexer.py             # Lexer tokenization unit tests
+│   ├── test_parser.py            # Parser grammar & precedence tests
+│   ├── test_semantic.py          # Scope isolation & semantic validation tests
+│   ├── test_tac.py               # TAC quadruple generation tests
+│   ├── test_optimizer.py         # Algebraic identity, folding & DCE tests
+│   ├── test_interpreter.py       # VM execution & runtime error tests
+│   ├── test_errors.py            # Exception hierarchy & formatting tests
+│   ├── test_ast_viz.py           # AST visualization & fallback tests
+│   └── test_cli.py               # CLI driver & portability regression tests
 ├── examples/                     # Sudarshan Source Code Files (.mini)
-│   ├── valid.mini                # Complete feature test (while loop, if/else, arithmetic)
-│   ├── syntax_error.mini         # Syntax error handling demonstration
-│   ├── semantic_error.mini       # Scope & undeclared variable error test
-│   └── opt_demo.mini             # Optimization & constant folding test
+│   ├── valid.mini                # Complete feature test (loops, scopes, arithmetic)
+│   ├── opt_test.mini             # Constant folding & dead code elimination demo
+│   ├── nested_scope.mini         # Lexical block scoping & variable shadowing
+│   ├── error_syntax.mini         # Syntax error handling demonstration
+│   ├── error_semantic.mini       # Scope & undeclared variable error test
+│   ├── error_lexical.mini        # Unrecognized token error test
+│   └── error_runtime.mini        # VM division-by-zero runtime error test
 ├── docs/                         # Project Reports & Document Generators
 │   ├── generate_pdf.py           # Pure Python PDF generator engine
 │   ├── generate_phase1_pdf.py    # Generator for Phase1_Report.pdf
@@ -76,9 +83,13 @@ MyOWN_Compiler/
 │   ├── Phase1_Report.pdf
 │   ├── Review1_Defense_Guide.pdf
 │   └── Phase1_Project_Report.docx
-├── sudarshan                     # Executable CLI launcher script
-├── README.md                     # Comprehensive documentation & Viva Q&A
-└── .gitignore
+├── output/                       # Generated build artifacts (e.g. AST graphs)
+├── sudarshan                     # Cross-platform CLI launcher script (macOS/Linux)
+├── sudarshan.bat                 # Windows CMD/PowerShell launcher script
+├── gsd-pipeline.sh               # Integrated automated pipeline runner
+├── pyproject.toml                # Modern Python package configuration & test settings
+├── LICENSE                       # MIT License
+└── README.md                     # Comprehensive project documentation
 ```
 
 ---
@@ -132,7 +143,7 @@ factor     -> NUMBER | ID | '(' expr ')' | '-' factor
 ## 6. How to Run & CLI Usage
 
 ### Quick Start
-Execute the compiler using the `./sudarshan` wrapper script or `python3 src/main.py`:
+Execute the compiler using the portable `./sudarshan` launcher, `sudarshan.bat`, or `python3 src/main.py`:
 
 ```bash
 # Run program execution
@@ -141,8 +152,13 @@ Execute the compiler using the `./sudarshan` wrapper script or `python3 src/main
 # Display output across all compiler phases
 ./sudarshan examples/valid.mini --all
 
-# Run complete automated unittest suite (22 tests)
+# Run educational phase-by-phase explanation
+./sudarshan examples/valid.mini --explain
+
+# Run complete automated test suite (45 tests)
 python3 -m unittest discover -s tests
+# or using pytest in virtual environment:
+.venv/bin/python -m pytest -v
 ```
 
 ### Command Line Flags
@@ -150,15 +166,17 @@ python3 -m unittest discover -s tests
 | Flag | Description |
 |---|---|
 | `--tokens` | Display token stream generated by Lexer |
-| `--ast` | Display parsed Abstract Syntax Tree |
-| `--symtab` | Display global Symbol Table |
+| `--ast` | Display parsed Abstract Syntax Tree ASCII representation |
+| `--viz` | Render AST to graphical image (`output/ast_tree.png`) via Graphviz with fallback |
+| `--symtab` | Display global & block-level Symbol Tables |
 | `--tac` | Display unoptimized Three-Address Code quadruples |
 | `--opt` | Display optimized Three-Address Code quadruples |
-| `--explain` | Display detailed educational explanation of all phases |
+| `--explain` | Display detailed educational explanation of all compiler phases |
 | `--all` | Display output from all compiler phases |
+| `--debug` | Preserve full Python stack traces during execution for debugging |
 
 ---
 
 ## 7. License
 
-This project is open-source under the MIT License.
+This project is open-source under the [MIT License](LICENSE).
