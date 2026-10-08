@@ -11,6 +11,7 @@ from .errors import (
     SemanticError,
     TACError,
     CompilerRuntimeError,
+    SecurityIntegrityError,
 )
 
 __all__ = [
@@ -22,6 +23,6 @@ __all__ = [
     "SemanticError",
     "TACError",
     "CompilerRuntimeError",
+    "SecurityIntegrityError",
 ]
-
 

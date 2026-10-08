@@ -71,3 +71,6 @@ class CompilerRuntimeError(SudarshanError):
     pass
 
 
+class SecurityIntegrityError(SudarshanError):
+    """Raised when protected IR or its metadata fails integrity validation."""
+    pass

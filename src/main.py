@@ -21,6 +21,17 @@ from semantic import SemanticAnalyzer
 from tac import TACGenerator, dump_tac
 from tac_opt import optimize_tac, compare_optimization
 from interpreter import Interpreter
+from security import (
+    SecurityConfig,
+    SecurityPass,
+    SecureInterpreter,
+    analyze_block,
+    build_cfg,
+    format_report,
+    protect_ir,
+    score_features,
+    select_policy,
+)
 
 
 def print_explanation(filename: str, source_code: str, tokens: list, ast, symtab, raw_tac: list, opt_tac: list):
@@ -79,6 +90,28 @@ Examples:
     cli_parser.add_argument("--opt", action="store_true", help="Display optimized Three-Address Code")
     cli_parser.add_argument("--explain", action="store_true", help="Display detailed educational explanation of all phases")
     cli_parser.add_argument("--all", action="store_true", help="Display all compiler pipeline phases and execution output")
+    cli_parser.add_argument(
+        "--secure",
+        "--security",
+        dest="secure",
+        action="store_true",
+        help="Enable the optional security pass",
+    )
+    cli_parser.add_argument(
+        "--adaptive-security",
+        action="store_true",
+        help="Enable the security pass in adaptive mode",
+    )
+    cli_parser.add_argument(
+        "--security-report",
+        action="store_true",
+        help="Display security analysis information",
+    )
+    cli_parser.add_argument(
+        "--dump-protected-ir",
+        action="store_true",
+        help="Display IR after the security pass",
+    )
     cli_parser.add_argument("--debug", action="store_true", help="Preserve full Python tracebacks for compiler debugging")
 
 
@@ -93,7 +126,20 @@ Examples:
         args.opt = True
 
     # If no phase flags are set, run standard execution mode
-    run_execution_only = not (args.tokens or args.ast or args.symtab or args.tac or args.opt or args.explain)
+    security_requested = (
+        args.secure
+        or args.adaptive_security
+        or args.security_report
+        or args.dump_protected_ir
+    )
+    run_execution_only = not (
+        args.tokens
+        or args.ast
+        or args.symtab
+        or args.tac
+        or args.opt
+        or args.explain
+    )
 
     if not os.path.exists(args.filename):
         print(f"Error: Source file '{args.filename}' not found.", file=sys.stderr)
@@ -167,6 +213,30 @@ Examples:
             print("==================================================")
             print(dump_tac(opt_tac))
             print()
+
+        protected_tac = opt_tac
+        protected_program = None
+        security_config = SecurityConfig(
+            enabled=security_requested,
+            adaptive=args.adaptive_security,
+        )
+        if security_requested:
+            protected_tac = SecurityPass(security_config).transform(opt_tac)
+            cfg = build_cfg(protected_tac)
+            features = [analyze_block(block) for block in cfg.blocks]
+            scores = [score_features(feature) for feature in features]
+            policies = [select_policy(score) for score in scores]
+            protected_program = protect_ir(protected_tac, policies)
+            if args.security_report:
+                print(f"Security enabled: {security_config.enabled}")
+                print(f"Adaptive security: {security_config.adaptive}")
+                print(format_report(features, scores, policies))
+            if args.dump_protected_ir:
+                print("==================================================")
+                print("             PROTECTED INTERMEDIATE REPRESENTATION ")
+                print("==================================================")
+                print(dump_tac(protected_tac))
+                print()
     except TACError as err:
         if args.debug:
             raise
@@ -177,7 +247,7 @@ Examples:
     try:
         if args.explain:
             print_explanation(args.filename, source_code, tokens, ast, symtab, raw_tac, opt_tac)
-            vm = Interpreter(opt_tac)
+            vm = SecureInterpreter(protected_program) if protected_program else Interpreter(protected_tac)
             vm.run()
             print("\n✅ Execution finished successfully.")
         elif args.all or run_execution_only:
@@ -185,7 +255,7 @@ Examples:
             print("         PHASE 5: VIRTUAL MACHINE EXECUTION       ")
             print("==================================================")
             print("Program Output:")
-            vm = Interpreter(opt_tac)
+            vm = SecureInterpreter(protected_program) if protected_program else Interpreter(protected_tac)
             vm.run()
             print("\n✅ Execution finished successfully.")
     except CompilerRuntimeError as err:
