@@ -1,0 +1,377 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [2 0 R 4 0 R 6 0 R 8 0 R 10 0 R 12 0 R 14 0 R 16 0 R 18 0 R 20 0 R] /Count 10 >>
+endobj
+3 0 obj
+<< /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> /F2 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >> /F3 << /Type /Font /Subtype /Type1 /BaseFont /Courier >> >> >>
+endobj
+4 0 obj
+<< /Length 1288 >>
+stream
+0.2 0.2 0.2 RG 0.5 w
+40 807 m 555 807 l S
+BT /F1 9 Tf 0.3 0.3 0.3 rg 40 812 Td (Sudarshan Compiler Design Laboratory Documentation) Tj ET
+BT /F1 9 Tf 0.3 0.3 0.3 rg 480 812 Td (Page 1) Tj ET
+BT /F2 20 Tf 0.1 0.2 0.5 rg 40 774 Td (SUDARSHAN) Tj ET
+BT /F2 14 Tf 0.1 0.3 0.6 rg 40 752 Td (Compiler Evaluation and Marks Alignment Report) Tj ET
+BT /F2 11 Tf 0.2 0.2 0.2 rg 40 734 Td (Review 2 / Phase 2 Academic Submission) Tj ET
+0.95 0.95 0.97 rg 40 652 515 82 re f
+0.8 0.8 0.85 RG 0.5 w 40 652 515 82 re S
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 712 Td (Project: Sudarshan - An End-to-End Compiler and Virtual Machine) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 700 Td (Repository: laksh1357/Sudarshan_Compiler) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 688 Td (Student: Lakshya Singh | Registration No.: 24BDS0054) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 676 Td (Course: Compiler Design) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 664 Td (Evaluation total: 25 marks) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 652 Td (Verified test result: 55 tests passed) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 628 Td (This report maps the evaluation rubric to implementation evidence in the current) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 614 Td (repository and lists the demonstrations and explanations that maximize marks.) Tj ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 1 0 R /Resources 3 0 R >>
+endobj
+6 0 obj
+<< /Length 2548 >>
+stream
+0.2 0.2 0.2 RG 0.5 w
+40 807 m 555 807 l S
+BT /F1 9 Tf 0.3 0.3 0.3 rg 40 812 Td (Sudarshan Compiler Design Laboratory Documentation) Tj ET
+BT /F1 9 Tf 0.3 0.3 0.3 rg 480 812 Td (Page 2) Tj ET
+BT /F2 20 Tf 0.1 0.2 0.5 rg 40 774 Td (1. Evaluation Summary) Tj ET
+0.95 0.95 0.97 rg 40 560 515 214 re f
+0.8 0.8 0.85 RG 0.5 w 40 560 515 214 re S
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 752 Td (------------------------------+---------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 740 Td ( Criteria                     | Maximum marks | Evidence-based focus             ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 728 Td (------------------------------+---------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 716 Td ( Implementation Progress      | 7             | End-to-end working pipeline      ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 704 Td (------------------------------+---------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 692 Td ( Technical Correctness        | 5             | Correct compiler phases and VM   ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 680 Td (------------------------------+---------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 668 Td ( Compiler Concept Application | 4             | AST, scopes, TAC, optimization   ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 656 Td (------------------------------+---------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 644 Td ( Code Quality                 | 3             | Modular, readable, error-aware c ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 632 Td (------------------------------+---------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 620 Td ( Testing                      | 3             | Valid and invalid program covera ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 608 Td (------------------------------+---------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 596 Td ( Individual Understanding     | 3             | Architecture and design defense  ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 584 Td (------------------------------+---------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 572 Td ( Total                        | 25            | Complete Review 2 demonstration  ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 560 Td (------------------------------+---------------+----------------------------------) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 3 0 R /Resources 3 0 R >>
+endobj
+8 0 obj
+<< /Length 2176 >>
+stream
+0.2 0.2 0.2 RG 0.5 w
+40 807 m 555 807 l S
+BT /F1 9 Tf 0.3 0.3 0.3 rg 40 812 Td (Sudarshan Compiler Design Laboratory Documentation) Tj ET
+BT /F1 9 Tf 0.3 0.3 0.3 rg 480 812 Td (Page 3) Tj ET
+BT /F2 20 Tf 0.1 0.2 0.5 rg 40 774 Td (2. Implementation Progress - 7 Marks) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 760 Td (Maximum-mark demonstration: compile and execute a real .mini source file while showing the) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 746 Td (major intermediate stages.) Tj ET
+0.95 0.95 0.97 rg 40 640 515 106 re f
+0.8 0.8 0.85 RG 0.5 w 40 640 515 106 re S
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 724 Td (Source program) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 712 Td (  -> Lexer and token stream) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 700 Td (  -> Recursive-descent parser and AST) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 688 Td (  -> Semantic analysis and symbol table) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 676 Td (  -> Raw TAC quadruples) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 664 Td (  -> Optimized TAC) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 652 Td (  -> TAC interpreter / virtual machine) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 640 Td (  -> Program output) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 616 Td (- Run examples/valid.mini end to end and show its output.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 602 Td (- Use --all to display tokens, AST, symbol table, TAC, optimized TAC, and execution.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 588 Td (- Explain that the project is not only a front-end: it executes generated intermediate) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 574 Td (code.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 560 Td (- Show examples/opt_test.mini and examples/nested_scope.mini as additional evidence.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 546 Td (- Mention the optional security analysis path only as an extension; the normal pipeline) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 532 Td (remains unchanged.) Tj ET
+0.95 0.95 0.97 rg 40 498 515 34 re f
+0.8 0.8 0.85 RG 0.5 w 40 498 515 34 re S
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 510 Td (Recommended command:) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 498 Td (PYTHONPATH=src python3 src/main.py examples/valid.mini --all) Tj ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 5 0 R /Resources 3 0 R >>
+endobj
+10 0 obj
+<< /Length 3480 >>
+stream
+0.2 0.2 0.2 RG 0.5 w
+40 807 m 555 807 l S
+BT /F1 9 Tf 0.3 0.3 0.3 rg 40 812 Td (Sudarshan Compiler Design Laboratory Documentation) Tj ET
+BT /F1 9 Tf 0.3 0.3 0.3 rg 480 812 Td (Page 4) Tj ET
+BT /F2 20 Tf 0.1 0.2 0.5 rg 40 774 Td (3. Technical Correctness - 5 Marks) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 760 Td (The implementation contains the required compiler stages and centralized error handling.) Tj ET
+0.95 0.95 0.97 rg 40 570 515 190 re f
+0.8 0.8 0.85 RG 0.5 w 40 570 515 190 re S
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 738 Td (-------------------+----------------------------------+-------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 726 Td ( Phase             | Verified implementation          | Demonstration     ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 714 Td (-------------------+----------------------------------+-------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 702 Td ( Lexical analysis  | Custom location-aware lexer      | --tokens          ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 690 Td (-------------------+----------------------------------+-------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 678 Td ( Parsing           | Handwritten recursive descent    | --ast             ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 666 Td (-------------------+----------------------------------+-------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 654 Td ( Semantic analysis | Type and scope validation        | --symtab          ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 642 Td (-------------------+----------------------------------+-------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 630 Td ( IR generation     | TAC quadruples                   | --tac             ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 618 Td (-------------------+----------------------------------+-------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 606 Td ( Optimization      | Folding, propagation, DCE, ident | --opt             ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 594 Td (-------------------+----------------------------------+-------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 582 Td ( Execution         | Custom TAC VM                    | Default execution ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 570 Td (-------------------+----------------------------------+-------------------) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 546 Td (- Explain that LexerError, ParserError, SemanticError, TACError, and CompilerRuntimeError) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 532 Td (are distinct error categories.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 518 Td (- Demonstrate a syntax error using examples/error_syntax.mini.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 504 Td (- Demonstrate a semantic error using examples/error_semantic.mini.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 490 Td (- Demonstrate a runtime error using examples/error_runtime.mini.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 476 Td (- Explain that Graphviz failure is non-fatal and does not stop compilation.) Tj ET
+0.95 0.95 0.97 rg 40 418 515 58 re f
+0.8 0.8 0.85 RG 0.5 w 40 418 515 58 re S
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 454 Td (Recommended commands:) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 442 Td (PYTHONPATH=src python3 src/main.py examples/error_syntax.mini) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 430 Td (PYTHONPATH=src python3 src/main.py examples/error_semantic.mini) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 418 Td (PYTHONPATH=src python3 src/main.py examples/error_runtime.mini) Tj ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 7 0 R /Resources 3 0 R >>
+endobj
+12 0 obj
+<< /Length 2169 >>
+stream
+0.2 0.2 0.2 RG 0.5 w
+40 807 m 555 807 l S
+BT /F1 9 Tf 0.3 0.3 0.3 rg 40 812 Td (Sudarshan Compiler Design Laboratory Documentation) Tj ET
+BT /F1 9 Tf 0.3 0.3 0.3 rg 480 812 Td (Page 5) Tj ET
+BT /F2 20 Tf 0.1 0.2 0.5 rg 40 774 Td (4. Compiler Concept Application - 4 Marks) Tj ET
+BT /F2 11 Tf 0.2 0.2 0.2 rg 40 756 Td (Abstract Syntax Tree) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 742 Td (The parser converts tokens into typed AST nodes such as Program, VarDecl, Assignment,) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 728 Td (BinaryExpr, IfStmt, WhileStmt, and Block. The AST removes unnecessary punctuation while) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 714 Td (preserving program structure and source locations.) Tj ET
+BT /F2 11 Tf 0.2 0.2 0.2 rg 40 696 Td (Symbol Table and Lexical Scope) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 682 Td (Scope objects form a parent-linked chain. Lookup searches the active scope and then its) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 668 Td (parents. Same-scope duplicates are rejected and nested declarations may shadow outer) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 654 Td (names.) Tj ET
+BT /F2 11 Tf 0.2 0.2 0.2 rg 40 636 Td (Three-Address Code) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 622 Td (TACInstruction stores op, arg1, arg2, and result. Temporaries such as t1 and labels such) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 608 Td (as L1 make expression evaluation and control flow explicit.) Tj ET
+BT /F2 11 Tf 0.2 0.2 0.2 rg 40 590 Td (Optimization) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 576 Td (- Constant folding evaluates known arithmetic and comparisons at compile time.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 562 Td (- Constant propagation substitutes known values into later TAC operands.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 548 Td (- Algebraic simplification handles identities such as x + 0 and x * 1.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 534 Td (- Dead-code elimination removes instructions after unconditional jumps in linear TAC.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 520 Td (- For technical accuracy, explain that CFG-aware data-flow and runtime-error preservation) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 506 Td (remain improvement areas.) Tj ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 9 0 R /Resources 3 0 R >>
+endobj
+14 0 obj
+<< /Length 1353 >>
+stream
+0.2 0.2 0.2 RG 0.5 w
+40 807 m 555 807 l S
+BT /F1 9 Tf 0.3 0.3 0.3 rg 40 812 Td (Sudarshan Compiler Design Laboratory Documentation) Tj ET
+BT /F1 9 Tf 0.3 0.3 0.3 rg 480 812 Td (Page 6) Tj ET
+BT /F2 20 Tf 0.1 0.2 0.5 rg 40 774 Td (5. Code Quality - 3 Marks) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 760 Td (- Modules are separated by compiler responsibility: lexer, parser, AST, semantic analysis,) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 746 Td (symbol table, TAC, optimizer, interpreter, and CLI.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 732 Td (- Names such as TACInstruction, SemanticAnalyzer, SymbolTable, and CompilerRuntimeError) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 718 Td (are meaningful and consistent.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 704 Td (- The project uses standard-library typing, dataclasses, enums, and structured exceptions.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 690 Td (- The CLI supports normal execution, diagnostic phase flags, --explain, --debug, and) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 676 Td (optional security analysis.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 662 Td (- Graphviz is optional and handled with a graceful fallback.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 648 Td (- Documentation should be kept synchronized with the verified 55-test state and current) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 634 Td (repository URL.) Tj ET
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 11 0 R /Resources 3 0 R >>
+endobj
+16 0 obj
+<< /Length 4225 >>
+stream
+0.2 0.2 0.2 RG 0.5 w
+40 807 m 555 807 l S
+BT /F1 9 Tf 0.3 0.3 0.3 rg 40 812 Td (Sudarshan Compiler Design Laboratory Documentation) Tj ET
+BT /F1 9 Tf 0.3 0.3 0.3 rg 480 812 Td (Page 7) Tj ET
+BT /F2 20 Tf 0.1 0.2 0.5 rg 40 774 Td (6. Testing - 3 Marks) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 760 Td (The current repository independently verifies 55 passing unittest tests across lexer,) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 746 Td (parser, semantic analysis, TAC, optimizer, interpreter, errors, AST visualization, CLI,) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 732 Td (and security.) Tj ET
+0.95 0.95 0.97 rg 40 422 515 310 re f
+0.8 0.8 0.85 RG 0.5 w 40 422 515 310 re S
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 710 Td (---------------------+-------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 698 Td ( Test module         | Tests | Coverage                         ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 686 Td (---------------------+-------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 674 Td ( test_lexer.py       | 4     | Tokens, comments, locations, lex ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 662 Td (---------------------+-------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 650 Td ( test_parser.py      | 5     | Grammar, precedence, blocks, syn ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 638 Td (---------------------+-------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 626 Td ( test_semantic.py    | 5     | Scopes, shadowing, declarations  ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 614 Td (---------------------+-------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 602 Td ( test_tac.py         | 2     | Quadruples, temporaries, labels  ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 590 Td (---------------------+-------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 578 Td ( test_optimizer.py   | 4     | Folding, identities, DCE, zero d ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 566 Td (---------------------+-------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 554 Td ( test_interpreter.py | 8     | VM execution and runtime errors  ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 542 Td (---------------------+-------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 530 Td ( test_errors.py      | 4     | Exception hierarchy and formatti ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 518 Td (---------------------+-------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 506 Td ( test_ast_viz.py     | 4     | DOT, rendering, fallback         ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 494 Td (---------------------+-------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 482 Td ( test_cli.py         | 9     | CLI flags, errors, portability   ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 470 Td (---------------------+-------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 458 Td ( test_security.py    | 10    | Security analysis and verified e ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 446 Td (---------------------+-------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 434 Td ( Total               | 55    | All passing                      ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 422 Td (---------------------+-------+----------------------------------) Tj ET
+BT /F2 11 Tf 0.2 0.2 0.2 rg 40 394 Td (Recommended live evidence) Tj ET
+0.95 0.95 0.97 rg 40 324 515 70 re f
+0.8 0.8 0.85 RG 0.5 w 40 324 515 70 re S
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 372 Td (PYTHONPATH=src python3 -m unittest discover -s tests -v) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 360 Td () Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 348 Td (Expected result:) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 336 Td (Ran 55 tests) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 324 Td (OK) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 300 Td (For a stronger future submission, add raw-versus-optimized execution equivalence tests,) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 286 Td (especially for branches, loops, reassignment, and division-by-zero behavior.) Tj ET
+endstream
+endobj
+17 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 13 0 R /Resources 3 0 R >>
+endobj
+18 0 obj
+<< /Length 2712 >>
+stream
+0.2 0.2 0.2 RG 0.5 w
+40 807 m 555 807 l S
+BT /F1 9 Tf 0.3 0.3 0.3 rg 40 812 Td (Sudarshan Compiler Design Laboratory Documentation) Tj ET
+BT /F1 9 Tf 0.3 0.3 0.3 rg 480 812 Td (Page 8) Tj ET
+BT /F2 20 Tf 0.1 0.2 0.5 rg 40 774 Td (7. Individual Understanding - 3 Marks) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 760 Td (The following answers should be prepared for viva or project defense.) Tj ET
+0.95 0.95 0.97 rg 40 522 515 238 re f
+0.8 0.8 0.85 RG 0.5 w 40 522 515 238 re S
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 738 Td (----------------------------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 726 Td ( Question                         | Answer points                    ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 714 Td (----------------------------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 702 Td ( Why use TAC?                     | It makes expression evaluation,  ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 690 Td (----------------------------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 678 Td ( Why use a symbol table?          | It resolves declarations, types, ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 666 Td (----------------------------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 654 Td ( How is precedence implemented?   | Parser call hierarchy: factor, t ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 642 Td (----------------------------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 630 Td ( How does the VM execute?         | Program counter, memory dictiona ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 618 Td (----------------------------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 606 Td ( Why optimize TAC?                | Reduce compile-time computation  ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 594 Td (----------------------------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 582 Td ( How are errors handled?          | Phase-specific exceptions with l ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 570 Td (----------------------------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 558 Td ( Why preserve raw and optimized T | It supports explanation and comp ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 546 Td (----------------------------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 534 Td ( What is not implemented?         | SSA, PGO, and real security obfu ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 522 Td (----------------------------------+----------------------------------) Tj ET
+endstream
+endobj
+19 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 15 0 R /Resources 3 0 R >>
+endobj
+20 0 obj
+<< /Length 1292 >>
+stream
+0.2 0.2 0.2 RG 0.5 w
+40 807 m 555 807 l S
+BT /F1 9 Tf 0.3 0.3 0.3 rg 40 812 Td (Sudarshan Compiler Design Laboratory Documentation) Tj ET
+BT /F1 9 Tf 0.3 0.3 0.3 rg 480 812 Td (Page 9) Tj ET
+BT /F2 20 Tf 0.1 0.2 0.5 rg 40 774 Td (8. Demonstration Checklist) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 760 Td (- Open the repository and identify src/, tests/, examples/, and docs/.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 746 Td (- Run the complete test suite and show the passing result.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 732 Td (- Run valid.mini with --all.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 718 Td (- Display the AST and explain one BinaryExpr.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 704 Td (- Display the symbol table and explain declaration lookup.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 690 Td (- Display raw and optimized TAC and identify a folded constant.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 676 Td (- Explain one label and one conditional jump.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 662 Td (- Run the VM and explain the program counter and memory.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 648 Td (- Run syntax, semantic, and runtime error examples.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 634 Td (- Mention the optimizer correctness limitation honestly and describe the planned fix.) Tj ET
+endstream
+endobj
+21 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 17 0 R /Resources 3 0 R >>
+endobj
+22 0 obj
+<< /Length 2436 >>
+stream
+0.2 0.2 0.2 RG 0.5 w
+40 807 m 555 807 l S
+BT /F1 9 Tf 0.3 0.3 0.3 rg 40 812 Td (Sudarshan Compiler Design Laboratory Documentation) Tj ET
+BT /F1 9 Tf 0.3 0.3 0.3 rg 480 812 Td (Page 10) Tj ET
+BT /F2 20 Tf 0.1 0.2 0.5 rg 40 774 Td (9. Final Marks Strategy) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 760 Td (To maximize marks, prioritize a live, repeatable demonstration over unsupported claims.) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 746 Td (Show the implementation, connect each output to a compiler concept, and explain design) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 732 Td (choices in your own words.) Tj ET
+0.95 0.95 0.97 rg 40 542 515 190 re f
+0.8 0.8 0.85 RG 0.5 w 40 542 515 190 re S
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 710 Td (--------------------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 698 Td ( Criterion                | Maximum-mark evidence            ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 686 Td (--------------------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 674 Td ( Implementation Progress  | End-to-end source-to-output run  ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 662 Td (--------------------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 650 Td ( Technical Correctness    | Valid and invalid programs with  ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 638 Td (--------------------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 626 Td ( Compiler Concepts        | AST, nested scopes, TAC quadrupl ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 614 Td (--------------------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 602 Td ( Code Quality             | Modular files, type hints, excep ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 590 Td (--------------------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 578 Td ( Testing                  | 55 passing tests plus live error ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 566 Td (--------------------------+----------------------------------) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 554 Td ( Individual Understanding | Explain architecture, trade-offs ) Tj ET
+BT /F3 9 Tf 0.15 0.15 0.25 rg 48 542 Td (--------------------------+----------------------------------) Tj ET
+BT /F1 10 Tf 0.1 0.1 0.1 rg 40 518 Td (Total rubric allocation: 7 + 5 + 4 + 3 + 3 + 3 = 25 marks.) Tj ET
+endstream
+endobj
+23 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 19 0 R /Resources 3 0 R >>
+endobj
+xref
+0 24
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000182 00000 n 
+0000000395 00000 n 
+0000001735 00000 n 
+0000001839 00000 n 
+0000004439 00000 n 
+0000004543 00000 n 
+0000006771 00000 n 
+0000006875 00000 n 
+0000010408 00000 n 
+0000010513 00000 n 
+0000012735 00000 n 
+0000012840 00000 n 
+0000014246 00000 n 
+0000014352 00000 n 
+0000018630 00000 n 
+0000018736 00000 n 
+0000021501 00000 n 
+0000021607 00000 n 
+0000022952 00000 n 
+0000023058 00000 n 
+0000025547 00000 n 
+trailer
+<< /Size 24 /Root 1 0 R >>
+startxref
+25653
+%%EOF
