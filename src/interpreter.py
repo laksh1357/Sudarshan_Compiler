@@ -6,7 +6,7 @@ maintaining variable memory, temporary memory, label map, and program counter (P
 Raises CompilerRuntimeError from errors.py for runtime errors such as division by zero.
 """
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from errors import CompilerRuntimeError
 from tac import TACInstruction
 
