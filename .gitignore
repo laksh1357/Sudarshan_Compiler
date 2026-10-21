@@ -16,6 +16,15 @@ env/
 venv/
 ENV/
 .DS_Store
+FCFS/
+untitled folder/
+
+# Frontend Node and Build Artifacts
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+*.local
+
 
 # Generated AST visualizations & output directory
 output/

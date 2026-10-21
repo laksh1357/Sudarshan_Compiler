@@ -1,0 +1,11 @@
+// Factorial Computation in Sudarshan
+// Demonstrates iterative while loop, multiplication, and countdown
+int n = 5;
+int fact = 1;
+
+while (n > 1) {
+    fact = fact * n;
+    n = n - 1;
+}
+
+print(fact);

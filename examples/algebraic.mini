@@ -1,0 +1,19 @@
+// Algebraic Identity Simplification Demo
+// Inside loop blocks where variables are dynamic, identities simplify:
+// x + 0 -> x, x * 1 -> x, x - x -> 0, x * 0 -> 0, x / 1 -> x
+int x = 10;
+int count = 1;
+
+while (count > 0) {
+    int a = x + 0;
+    int b = x * 1;
+    int c = x - x;
+    int d = x * 0;
+    int e = x / 1;
+    print(a);
+    print(b);
+    print(c);
+    print(d);
+    print(e);
+    count = count - 1;
+}

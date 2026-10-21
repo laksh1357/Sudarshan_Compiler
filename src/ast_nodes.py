@@ -255,6 +255,95 @@ def export_ast_dot(node: ASTNode) -> str:
     return "\n".join(lines)
 
 
+def ast_to_dict(node: ASTNode) -> dict:
+    """
+    Serializes an ASTNode tree into a structured dictionary suitable
+    for JSON serialization and interactive graphical tree rendering.
+    """
+    node_id = 0
+
+    def _serialize(n: ASTNode) -> dict:
+        nonlocal node_id
+        curr_id = f"ast_node_{node_id}"
+        node_id += 1
+
+        node_type = n.__class__.__name__
+        label = node_type
+        details = {}
+
+        if isinstance(n, IntegerLiteral):
+            label = f"Literal: {n.value}"
+            details["value"] = n.value
+        elif isinstance(n, Variable):
+            label = f"Var: {n.name}"
+            details["name"] = n.name
+        elif isinstance(n, VarDecl):
+            label = f"VarDecl: {n.var_type} {n.name}"
+            details["var_type"] = n.var_type
+            details["name"] = n.name
+        elif isinstance(n, Assignment):
+            label = f"Assign: {n.name} ="
+            details["name"] = n.name
+        elif isinstance(n, BinaryExpr):
+            label = f"BinaryOp: {n.operator}"
+            details["operator"] = n.operator
+        elif isinstance(n, UnaryExpr):
+            label = f"UnaryOp: {n.operator}"
+            details["operator"] = n.operator
+        elif isinstance(n, PrintStmt):
+            label = "Print"
+        elif isinstance(n, IfStmt):
+            label = "If"
+        elif isinstance(n, WhileStmt):
+            label = "While"
+        elif isinstance(n, Block):
+            label = "Block"
+        elif isinstance(n, Program):
+            label = "Program"
+
+        children_dict = []
+        raw_children = []
+        if isinstance(n, Program):
+            raw_children = [("stmt", s) for s in n.statements]
+        elif isinstance(n, VarDecl):
+            raw_children = [("init", n.initializer)]
+        elif isinstance(n, Assignment):
+            raw_children = [("value", n.value)]
+        elif isinstance(n, PrintStmt):
+            raw_children = [("expr", n.expression)]
+        elif isinstance(n, IfStmt):
+            raw_children = [("condition", n.condition), ("then", n.then_branch)]
+            if n.else_branch:
+                raw_children.append(("else", n.else_branch))
+        elif isinstance(n, WhileStmt):
+            raw_children = [("condition", n.condition), ("body", n.body)]
+        elif isinstance(n, Block):
+            raw_children = [("stmt", s) for s in n.statements]
+        elif isinstance(n, BinaryExpr):
+            raw_children = [("left", n.left), ("right", n.right)]
+        elif isinstance(n, UnaryExpr):
+            raw_children = [("operand", n.operand)]
+
+        for rel, child in raw_children:
+            if child is not None:
+                child_data = _serialize(child)
+                child_data["relation"] = rel
+                children_dict.append(child_data)
+
+        return {
+            "id": curr_id,
+            "type": node_type,
+            "label": label,
+            "line": n.line,
+            "column": n.column,
+            "details": details,
+            "children": children_dict,
+        }
+
+    return _serialize(node)
+
+
+
 def render_ast_graph(node: ASTNode, output_path: str = "output/ast_tree") -> bool:
     """
     Safely renders the AST to an image file using Graphviz dot engine.

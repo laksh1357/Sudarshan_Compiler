@@ -17,12 +17,14 @@ class Interpreter:
     Demonstrates the final execution phase of the compiler pipeline.
     """
 
-    def __init__(self, instructions: List[TACInstruction]):
+    def __init__(self, instructions: List[TACInstruction], max_steps: Optional[int] = None):
         self.instructions = instructions
         self.memory: Dict[str, int] = {}
         self.label_map: Dict[str, int] = {}
         self.output: List[int] = []
         self.pc = 0
+        self.step_count = 0
+        self.max_steps = max_steps
 
         # Pre-pass: Index label locations for O(1) GOTO jumps
         for idx, inst in enumerate(self.instructions):
@@ -50,9 +52,14 @@ class Interpreter:
         Returns a list of values printed during execution.
         """
         self.pc = 0
+        self.step_count = 0
         n = len(self.instructions)
 
         while self.pc < n:
+            self.step_count += 1
+            if self.max_steps is not None and self.step_count > self.max_steps:
+                raise CompilerRuntimeError(f"Execution step limit exceeded ({self.max_steps} steps). Potential infinite loop.")
+
             inst = self.instructions[self.pc]
             op = inst.op
 

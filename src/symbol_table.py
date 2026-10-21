@@ -26,6 +26,15 @@ class Symbol:
         self.column = column
         self.scope_level = scope_level
 
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "type_name": self.type_name,
+            "line": self.line,
+            "column": self.column,
+            "scope_level": self.scope_level,
+        }
+
     def __repr__(self) -> str:
         loc = f" (L{self.line}:C{self.column})" if self.line is not None else ""
         return f"Symbol({self.name}: {self.type_name}, Scope {self.scope_level}{loc})"
@@ -38,6 +47,7 @@ class Scope:
         self.scope_level = scope_level
         self.parent = parent
         self.symbols: Dict[str, Symbol] = {}
+        self.children: list = []
 
     def declare(self, symbol: Symbol) -> Symbol:
         """Declares a symbol in the current scope. Raises ValueError if already declared in this scope."""
@@ -71,6 +81,12 @@ class Scope:
                 res += f"{prefix}  {sym}\n"
         return res
 
+    def to_dict(self) -> dict:
+        return {
+            "scope_level": self.scope_level,
+            "symbols": [s.to_dict() for s in self.symbols.values()],
+        }
+
 
 class SymbolTable:
     """
@@ -81,6 +97,7 @@ class SymbolTable:
     def __init__(self):
         self.global_scope = Scope(scope_level=0, parent=None)
         self._current_scope = self.global_scope
+        self.all_scopes: list[Scope] = [self.global_scope]
 
     def current_scope(self) -> Scope:
         """Returns the active scope."""
@@ -89,7 +106,9 @@ class SymbolTable:
     def enter_scope(self) -> Scope:
         """Enters a new nested scope (e.g. entering a block { ... })."""
         new_scope = Scope(scope_level=self._current_scope.scope_level + 1, parent=self._current_scope)
+        self._current_scope.children.append(new_scope)
         self._current_scope = new_scope
+        self.all_scopes.append(new_scope)
         return new_scope
 
     def exit_scope(self) -> Scope:
@@ -98,7 +117,6 @@ class SymbolTable:
             raise CompilerRuntimeError("Cannot exit global scope.")
         self._current_scope = self._current_scope.parent
         return self._current_scope
-
 
     def declare(
         self,
@@ -126,5 +144,20 @@ class SymbolTable:
         return self._current_scope.lookup_current_scope(name)
 
     def dump(self) -> str:
-        """Dumps the global scope table."""
-        return self.global_scope.dump()
+        """Dumps the global scope table and nested scopes."""
+        res = []
+        for scope in self.all_scopes:
+            res.append(scope.dump())
+        return "\n".join(res)
+
+    def to_dict(self) -> dict:
+        """Exports all scopes and symbols in a structured format."""
+        all_symbols = []
+        for scope in self.all_scopes:
+            for sym in scope.symbols.values():
+                all_symbols.append(sym.to_dict())
+        return {
+            "scopes": [s.to_dict() for s in self.all_scopes],
+            "symbols": all_symbols,
+        }
+
