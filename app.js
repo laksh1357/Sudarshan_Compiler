@@ -1,0 +1,596 @@
+document.addEventListener("DOMContentLoaded", () => {
+    const editor = document.getElementById("code-editor");
+    const lineNumbers = document.getElementById("line-numbers");
+    const presetSelect = document.getElementById("preset-select");
+    const runBtn = document.getElementById("run-btn");
+    const clearBtn = document.getElementById("clear-btn");
+    const copyBtn = document.getElementById("copy-btn");
+    
+    const errorBanner = document.getElementById("error-banner");
+    const errorContent = document.getElementById("error-content");
+    const errorClose = document.getElementById("error-close");
+    
+    const tabBtns = document.querySelectorAll(".tab-btn");
+    const tabPanes = document.querySelectorAll(".tab-pane");
+    
+    const tokensView = document.getElementById("tokens-view");
+    const astTreeView = document.getElementById("ast-tree-view");
+    const symtableBody = document.getElementById("symtable-body");
+    const irView = document.getElementById("ir-view");
+    const optIrView = document.getElementById("opt-ir-view");
+    const optBehaviorText = document.getElementById("opt-behavior-text");
+    const consoleOutput = document.getElementById("console-output");
+
+    let presetsData = {};
+    let currentAstJson = null;
+    let currentAstRaw = "";
+
+    // Sync line numbers
+    function updateLineNumbers() {
+        const lines = editor.value.split("\n").length;
+        lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join("<br>");
+    }
+
+    editor.addEventListener("input", updateLineNumbers);
+    editor.addEventListener("scroll", () => {
+        lineNumbers.scrollTop = editor.scrollTop;
+    });
+
+    // Support Tab key in editor (insert 4 spaces)
+    editor.addEventListener("keydown", (e) => {
+        if (e.key === "Tab") {
+            e.preventDefault();
+            const start = editor.selectionStart;
+            const end = editor.selectionEnd;
+            editor.value = editor.value.substring(0, start) + "    " + editor.value.substring(end);
+            editor.selectionStart = editor.selectionEnd = start + 4;
+            updateLineNumbers();
+        }
+    });
+
+    // Fetch presets from Python backend
+    fetch("/api/presets")
+        .then(res => res.json())
+        .then(presets => {
+            presetsData = presets;
+            const defaultKey = presets["valid.mini"] ? "valid.mini" : Object.keys(presets)[0];
+            if (defaultKey && presets[defaultKey]) {
+                presetSelect.value = defaultKey;
+                editor.value = presets[defaultKey];
+                updateLineNumbers();
+                compileCode();
+            }
+        })
+        .catch(err => {
+            console.warn("Could not load presets from /api/presets, fallback to default code:", err);
+            updateLineNumbers();
+            compileCode();
+        });
+
+    // Preset dropdown selection
+    presetSelect.addEventListener("change", (e) => {
+        const val = e.target.value;
+        if (val !== "custom" && presetsData[val]) {
+            editor.value = presetsData[val];
+            updateLineNumbers();
+            compileCode();
+        }
+    });
+
+    // Clear editor
+    clearBtn.addEventListener("click", () => {
+        editor.value = "";
+        presetSelect.value = "custom";
+        updateLineNumbers();
+    });
+
+    // Copy editor content
+    copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(editor.value);
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => copyBtn.textContent = "Copy", 1500);
+    });
+
+    // Close error banner
+    errorClose.addEventListener("click", () => {
+        errorBanner.classList.add("hidden");
+    });
+
+    // Tab switching helper
+    function activateTab(target) {
+        tabBtns.forEach(b => b.classList.toggle("active", b.dataset.tab === target));
+        tabPanes.forEach(p => p.classList.toggle("active", p.id === target));
+        
+        // Update header stepper active state
+        const reverseMap = {
+            "tab-tokens": "step-tokens",
+            "tab-ast": "step-ast",
+            "tab-symtable": "step-symtable",
+            "tab-semantics": "step-semantics",
+            "tab-raw-ir": "step-raw-ir",
+            "tab-opt-ir": "step-opt-ir",
+            "tab-opt-behavior": "step-opt-behavior",
+            "tab-console": "step-console"
+        };
+        const activeStepId = reverseMap[target];
+        document.querySelectorAll(".pipeline-step").forEach(step => {
+            step.classList.toggle("active", step.id === activeStepId);
+        });
+
+        if (target === "tab-ast") {
+            setTimeout(() => {
+                try { renderSVGTree(currentAstJson); } catch(e) { console.error(e); }
+            }, 50);
+        }
+    }
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+            activateTab(btn.dataset.tab);
+        });
+    });
+
+    // Compiler pipeline steps click navigation
+    const pipelineStepMap = {
+        "step-tokens": "tab-tokens",
+        "step-ast": "tab-ast",
+        "step-symtable": "tab-symtable",
+        "step-semantics": "tab-semantics",
+        "step-raw-ir": "tab-raw-ir",
+        "step-opt-ir": "tab-opt-ir",
+        "step-opt-behavior": "tab-opt-behavior",
+        "step-console": "tab-console"
+    };
+
+    Object.keys(pipelineStepMap).forEach(stepId => {
+        const stepEl = document.getElementById(stepId);
+        if (stepEl) {
+            stepEl.addEventListener("click", () => {
+                activateTab(pipelineStepMap[stepId]);
+            });
+        }
+    });
+
+    // Generic copy buttons (text and icon buttons)
+    document.querySelectorAll(".copy-text-btn, .copy-icon-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const targetId = btn.dataset.target;
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+                const text = targetEl.value !== undefined ? targetEl.value : (targetEl.innerText || targetEl.textContent);
+                navigator.clipboard.writeText(text);
+                const orig = btn.innerHTML;
+                const isIcon = btn.classList.contains("copy-icon-btn");
+                btn.innerHTML = isIcon ? "✓" : "Copied!";
+                setTimeout(() => { btn.innerHTML = orig; }, 1500);
+            }
+        });
+    });
+
+    // Compile code trigger
+    runBtn.addEventListener("click", () => {
+        compileCode();
+    });
+
+    function compileCode() {
+        const code = editor.value;
+        runBtn.innerHTML = `<span class="btn-icon">⏳</span> Compiling...`;
+        errorBanner.classList.add("hidden");
+
+        fetch("/api/compile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code })
+        })
+        .then(res => res.json())
+        .then(data => {
+            runBtn.innerHTML = `<span class="btn-icon">▶</span> Compile &amp; Run`;
+            
+            if (data.errors && data.errors.length > 0) {
+                showErrors(data.errors);
+            }
+
+            // 1. Render Tokens
+            try {
+                tokensView.textContent = data.tokens || "No tokens generated.";
+            } catch (e) { console.error("Error rendering tokens:", e); }
+
+            // 2. Render AST
+            try {
+                renderAST(data.ast_json, data.ast);
+            } catch (e) { console.error("Error rendering AST:", e); }
+
+            // 3. Render Symbol Table (5 columns + raw text + scope notes)
+            try {
+                renderSymbolTable(data.symbol_table_data, data.symbol_table, data.symbol_table_notes);
+            } catch (e) { console.error("Error rendering Symbol Table:", e); }
+
+            // 4. Render Semantic Analysis (banner + passed checks list + raw text)
+            try {
+                const isSuccess = data.success || (data.semantic_checks && data.semantic_checks.length > 0 && (!data.errors || data.errors.length === 0));
+                renderSemantics(isSuccess, data.semantic_checks, data.semantic_analysis, data.errors);
+            } catch (e) { console.error("Error rendering Semantics:", e); }
+
+            // 5. Render Raw TAC
+            try {
+                irView.textContent = data.raw_tac || data.llvm_ir || "; Intermediate Representation (TAC) halted or failed.";
+            } catch (e) { console.error("Error rendering Raw TAC:", e); }
+
+            // 6. Render Expected Optimized IR & Behavior
+            try {
+                renderOptimizedBehavior(data.optimized_behavior, data.optimized_ir);
+            } catch (e) { console.error("Error rendering Optimized Behavior:", e); }
+
+            // 7. Render Execution Console Output
+            try {
+                if (data.success) {
+                    consoleOutput.innerHTML = `<span class="terminal-text">${escapeHtml(data.output)}</span>`;
+                } else {
+                    consoleOutput.innerHTML = `<span style="color: #ef4444;">[Compilation Halted] Check errors banner above.</span>`;
+                }
+            } catch (e) { console.error("Error rendering Console:", e); }
+        })
+        .catch(err => {
+            runBtn.innerHTML = `<span class="btn-icon">▶</span> Compile &amp; Run`;
+            showErrors([err.message || "Failed to reach compilation server."]);
+        });
+    }
+
+    function showErrors(errors) {
+        errorContent.innerHTML = errors.map(err => `<div>• ${escapeHtml(err)}</div>`).join("");
+        errorBanner.classList.remove("hidden");
+    }
+
+    // AST View Toggles
+    const graphBtn = document.getElementById("ast-view-graph-btn");
+    const cardsBtn = document.getElementById("ast-view-cards-btn");
+    const textBtn = document.getElementById("ast-view-text-btn");
+    
+    const astGraphContainer = document.getElementById("ast-graph-container");
+    const astTextView = document.getElementById("ast-text-view");
+    const astSvg = document.getElementById("ast-svg");
+
+    graphBtn.addEventListener("click", () => setAstView("graph"));
+    cardsBtn.addEventListener("click", () => setAstView("cards"));
+    textBtn.addEventListener("click", () => setAstView("text"));
+
+    function setAstView(mode) {
+        graphBtn.classList.toggle("active", mode === "graph");
+        cardsBtn.classList.toggle("active", mode === "cards");
+        textBtn.classList.toggle("active", mode === "text");
+
+        astGraphContainer.classList.toggle("hidden", mode !== "graph");
+        astTreeView.classList.toggle("hidden", mode !== "cards");
+        astTextView.classList.toggle("hidden", mode !== "text");
+
+        try {
+            if (mode === "graph") renderSVGTree(currentAstJson);
+            else if (mode === "cards") renderASTCards(currentAstJson, currentAstRaw);
+            else if (mode === "text") astTextView.textContent = currentAstRaw || "No AST generated.";
+        } catch (e) {
+            console.error("View mode error:", e);
+        }
+    }
+
+    function renderAST(astJson, rawAstText) {
+        currentAstJson = astJson;
+        currentAstRaw = rawAstText;
+
+        try { renderSVGTree(astJson); } catch (e) { console.error(e); }
+        try { renderASTCards(astJson, rawAstText); } catch (e) { console.error(e); }
+        try { astTextView.textContent = rawAstText || "No AST generated."; } catch (e) { console.error(e); }
+    }
+
+    // Interactive SVG Tree Layout Renderer
+    function renderSVGTree(astJson) {
+        if (!astJson || !astSvg) return;
+        astSvg.innerHTML = "";
+
+        // Build simplified node tree
+        function buildNode(data) {
+            if (!data) return null;
+            let label = data.label || data.type || "Node";
+            let sublabel = data.line ? `Line ${data.line}` : "";
+            let category = "expr";
+            let children = [];
+
+            const t = data.type || "";
+
+            if (t === "Program" || t === "Block") {
+                label = t === "Program" ? "Root Program" : "Block";
+                sublabel = `${data.children ? data.children.length : 0} Stmts`;
+                category = "root";
+                if (data.children) children = data.children.map(buildNode);
+            } else if (t.includes("Declaration") || t === "VarDecl" || t === "DeclarationStmt") {
+                const varName = data.details?.name || data.name || data.label?.replace("Decl: ", "") || "";
+                label = `Decl: int ${varName}`;
+                category = "stmt";
+                if (data.children) children = data.children.map(buildNode);
+                else if (data.value) children = [buildNode(data.value)];
+            } else if (t.includes("Assignment") || t === "Assign" || t === "AssignmentStmt") {
+                const varName = data.details?.name || data.name || data.label?.replace("Assign: ", "") || "";
+                label = `Assign: ${varName}`;
+                category = "stmt";
+                if (data.children) children = data.children.map(buildNode);
+                else if (data.value) children = [buildNode(data.value)];
+            } else if (t.includes("Print") || t === "PrintStmt") {
+                label = "print()";
+                category = "stmt";
+                if (data.children) children = data.children.map(buildNode);
+                else if (data.value) children = [buildNode(data.value)];
+            } else if (t.includes("While") || t === "WhileStmt") {
+                label = "WhileLoop";
+                category = "stmt";
+                if (data.children) children = data.children.map(buildNode);
+            } else if (t.includes("If") || t === "IfStmt") {
+                label = "IfBranch";
+                category = "stmt";
+                if (data.children) children = data.children.map(buildNode);
+            } else if (t.includes("Binary") || t === "BinaryOp" || t === "BinaryExpr") {
+                const op = data.details?.operator || data.op || "+";
+                label = `Op: ${op}`;
+                category = "expr";
+                if (data.children) children = data.children.map(buildNode);
+                else {
+                    if (data.left) children.push(buildNode(data.left));
+                    if (data.right) children.push(buildNode(data.right));
+                }
+            } else if (t.includes("Unary") || t === "UnaryOp" || t === "UnaryExpr") {
+                const op = data.details?.operator || data.op || "-";
+                label = `Unary: ${op}`;
+                category = "expr";
+                if (data.children) children = data.children.map(buildNode);
+                else if (data.expr) children = [buildNode(data.expr)];
+            } else if (t.includes("Literal") || t === "Integer" || t === "IntegerExpr") {
+                const val = data.details?.value !== undefined ? data.details.value : (data.value !== undefined ? data.value : data.label);
+                label = `Val: ${val}`;
+                category = "leaf";
+            } else if (t.includes("Variable") || t === "VariableExpr" || t === "Identifier") {
+                const name = data.details?.name || data.name || data.label;
+                label = `Var: ${name}`;
+                category = "leaf";
+            } else {
+                if (data.children) children = data.children.map(buildNode);
+            }
+
+            return { label, sublabel, category, children: children.filter(Boolean) };
+        }
+
+        const treeRoot = buildNode(astJson);
+        if (!treeRoot) return;
+
+        // Compute Layout: Node positions (x, y)
+        const NODE_WIDTH = 130;
+        const NODE_HEIGHT = 44;
+        const LEVEL_GAP = 70;
+        const SIBLING_GAP = 20;
+
+        function calcSubtreeWidth(node) {
+            if (!node.children || node.children.length === 0) {
+                node.subtreeWidth = NODE_WIDTH + SIBLING_GAP;
+                return node.subtreeWidth;
+            }
+            let w = 0;
+            node.children.forEach(c => {
+                w += calcSubtreeWidth(c);
+            });
+            node.subtreeWidth = Math.max(w, NODE_WIDTH + SIBLING_GAP);
+            return node.subtreeWidth;
+        }
+
+        calcSubtreeWidth(treeRoot);
+
+        let maxDepth = 0;
+        function assignCoords(node, leftX, depth) {
+            maxDepth = Math.max(maxDepth, depth);
+            node.y = 40 + depth * (NODE_HEIGHT + LEVEL_GAP);
+
+            if (!node.children || node.children.length === 0) {
+                node.x = leftX + (node.subtreeWidth) / 2;
+            } else {
+                let curLeft = leftX;
+                node.children.forEach(c => {
+                    assignCoords(c, curLeft, depth + 1);
+                    curLeft += c.subtreeWidth;
+                });
+                const firstChild = node.children[0];
+                const lastChild = node.children[node.children.length - 1];
+                node.x = (firstChild.x + lastChild.x) / 2;
+            }
+        }
+
+        assignCoords(treeRoot, 20, 0);
+
+        const totalWidth = Math.max(treeRoot.subtreeWidth + 60, astGraphContainer.clientWidth || 800);
+        const totalHeight = 60 + (maxDepth + 1) * (NODE_HEIGHT + LEVEL_GAP);
+
+        astSvg.setAttribute("width", totalWidth);
+        astSvg.setAttribute("height", totalHeight);
+
+        // Draw Lines (Edges) first
+        function drawEdges(node) {
+            if (!node.children) return;
+            node.children.forEach(child => {
+                const x1 = node.x;
+                const y1 = node.y + NODE_HEIGHT / 2;
+                const x2 = child.x;
+                const y2 = child.y - NODE_HEIGHT / 2;
+                const midY = (y1 + y2) / 2;
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`);
+                path.setAttribute("class", "tree-edge");
+                astSvg.appendChild(path);
+
+                drawEdges(child);
+            });
+        }
+        drawEdges(treeRoot);
+
+        // Draw Nodes
+        function drawNodes(node) {
+            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            group.setAttribute("class", "tree-node-group");
+            group.setAttribute("transform", `translate(${node.x - NODE_WIDTH / 2}, ${node.y - NODE_HEIGHT / 2})`);
+
+            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            rect.setAttribute("width", NODE_WIDTH);
+            rect.setAttribute("height", NODE_HEIGHT);
+            rect.setAttribute("class", `tree-node-rect ${node.category}`);
+            group.appendChild(rect);
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", NODE_WIDTH / 2);
+            text.setAttribute("y", node.sublabel ? NODE_HEIGHT / 2 - 3 : NODE_HEIGHT / 2 + 4);
+            text.setAttribute("class", "tree-node-text");
+            text.textContent = node.label;
+            group.appendChild(text);
+
+            if (node.sublabel) {
+                const subtext = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                subtext.setAttribute("x", NODE_WIDTH / 2);
+                subtext.setAttribute("y", NODE_HEIGHT / 2 + 11);
+                subtext.setAttribute("class", "tree-node-subtext");
+                subtext.textContent = node.sublabel;
+                group.appendChild(subtext);
+            }
+
+            astSvg.appendChild(group);
+
+            if (node.children) {
+                node.children.forEach(drawNodes);
+            }
+        }
+        drawNodes(treeRoot);
+    }
+
+    function renderASTCards(astJson, rawAstText) {
+        if (!astJson) {
+            astTreeView.innerHTML = `<pre class="code-view">${escapeHtml(rawAstText || "No AST generated.")}</pre>`;
+            return;
+        }
+
+        let html = `<div class="ast-tree">`;
+        html += `<div class="ast-node-card">
+            <div class="ast-node-title">📁 Root Program</div>
+            <div class="ast-node-detail">${astJson.children ? astJson.children.length : 0} Statements</div>
+        </div>`;
+
+        if (astJson.children) {
+            astJson.children.forEach(child => {
+                html += renderASTChild(child, 1);
+            });
+        }
+        html += `</div>`;
+        astTreeView.innerHTML = html;
+    }
+
+    function renderASTChild(node, depth) {
+        const indent = depth * 20;
+        let title = node.label || node.type;
+        let detail = node.line ? `Line ${node.line}` : "";
+
+        let html = `<div style="margin-left: ${indent}px;" class="ast-node-card">
+            <div class="ast-node-title">${escapeHtml(title)}</div>
+            <div class="ast-node-detail">${escapeHtml(detail)}</div>
+        </div>`;
+
+        if (node.children) {
+            node.children.forEach(child => {
+                html += renderASTChild(child, depth + 1);
+            });
+        }
+        return html;
+    }
+
+    function renderSymbolTable(symbols, rawText, notes) {
+        const rawEl = document.getElementById("symtable-raw-text");
+        const notesEl = document.getElementById("symtable-scope-note");
+
+        if (rawEl) {
+            rawEl.textContent = rawText || "No symbols recorded.";
+        }
+
+        if (notesEl) {
+            if (notes) {
+                let formatted = escapeHtml(notes);
+                formatted = formatted.replace(/\b(while|if|for)\b/g, '<code>$1</code>');
+                formatted = formatted.replace(/\bvariable\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, 'variable <code>$1</code>');
+                notesEl.innerHTML = formatted;
+                notesEl.style.display = "block";
+            } else {
+                notesEl.style.display = "none";
+            }
+        }
+
+        if (!symbols || symbols.length === 0) {
+            symtableBody.innerHTML = `<tr><td colspan="5" class="empty-state">No symbols recorded.</td></tr>`;
+            return;
+        }
+
+        const rows = symbols.map(s => {
+            return `<tr>
+                <td><strong>${escapeHtml(s.name)}</strong></td>
+                <td><span class="badge-type">${escapeHtml(s.type)}</span></td>
+                <td><span class="badge-kind">${escapeHtml(s.kind)}</span></td>
+                <td><span class="badge-scope">${escapeHtml(s.scope)}</span></td>
+                <td><span class="badge-value">${escapeHtml(s.value)}</span></td>
+            </tr>`;
+        });
+        symtableBody.innerHTML = rows.join("");
+    }
+
+    function renderSemantics(success, checks, rawText, errors) {
+        const banner = document.getElementById("semantics-status-banner");
+        const statusText = document.getElementById("semantics-status-text");
+        const checksList = document.getElementById("semantics-checks-list");
+        const rawEl = document.getElementById("semantics-raw-text");
+
+        if (success) {
+            if (banner) {
+                banner.className = "status-banner success";
+                if (statusText) statusText.textContent = "Semantic analysis: SUCCESS";
+            }
+            if (checksList) {
+                if (checks && checks.length > 0) {
+                    checksList.innerHTML = checks.map(c => 
+                        `<li><span class="check-icon">✓</span> <span>${escapeHtml(c)}</span></li>`
+                    ).join("");
+                } else {
+                    checksList.innerHTML = `<li><span class="check-icon">✓</span> <span>All semantic verifications passed cleanly.</span></li>`;
+                }
+            }
+            if (rawEl) {
+                rawEl.textContent = rawText || "Semantic analysis: SUCCESS";
+            }
+        } else {
+            if (banner) {
+                banner.className = "status-banner error";
+                if (statusText) statusText.textContent = "Semantic analysis: FAILED";
+            }
+            if (checksList) {
+                const errItems = (errors && errors.length > 0) ? errors : ["Semantic analysis halted with errors."];
+                checksList.innerHTML = errItems.map(e => 
+                    `<li><span class="check-icon error">✗</span> <span>${escapeHtml(e)}</span></li>`
+                ).join("");
+            }
+            if (rawEl) {
+                rawEl.textContent = `Semantic analysis: FAILED\n\nErrors:\n` + (errors || []).map(e => `- ${e}`).join("\n");
+            }
+        }
+    }
+
+    function renderOptimizedBehavior(behaviorText, optimizedIr) {
+        if (optBehaviorText) {
+            optBehaviorText.textContent = behaviorText || "No optimized behavior generated.";
+        }
+        if (optIrView) {
+            optIrView.textContent = optimizedIr || "; Optimized IR not available.";
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return "";
+        return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+});

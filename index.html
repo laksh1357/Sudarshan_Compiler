@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudarshan Compiler Studio - Interactive Compiler IDE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3.0.0">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation Header -->
+        <header class="navbar">
+            <div class="brand">
+                <div class="logo-icon">⚡</div>
+                <div class="logo-text">
+                    <h1>Sudarshan Studio</h1>
+                    <span class="sub-title">Sudarshan Language Compiler &amp; TAC Engine</span>
+                </div>
+            </div>
+            
+            <div class="compiler-pipeline">
+                <div class="pipeline-step active" id="step-tokens">1. Tokens</div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step" id="step-ast">2. AST</div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step" id="step-symtable">3. Symbol Table</div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step" id="step-semantics">4. Semantics</div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step" id="step-raw-ir">5. Raw TAC</div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step" id="step-opt-ir">6. Opt TAC</div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step" id="step-opt-behavior">7. Opt Behavior</div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step" id="step-console">8. Output</div>
+            </div>
+
+            <div class="header-actions">
+                <div class="preset-group">
+                    <label for="preset-select">Samples:</label>
+                    <select id="preset-select" class="preset-dropdown">
+                        <option value="valid.mini">valid.mini (While Loop &amp; Branches)</option>
+                        <option value="opt_test.mini">opt_test.mini (Constant Folding)</option>
+                        <option value="nested_scope.mini">nested_scope.mini (Block Scoping)</option>
+                        <option value="algebraic.mini">algebraic.mini (Algebraic Identities)</option>
+                        <option value="loop_factorial.mini">loop_factorial.mini (Factorial)</option>
+                        <option value="error_syntax.mini">error_syntax.mini (Syntax Error Demo)</option>
+                        <option value="error_semantic.mini">error_semantic.mini (Semantic Error Demo)</option>
+                        <option value="error_lexical.mini">error_lexical.mini (Lexer Error Demo)</option>
+                        <option value="error_runtime.mini">error_runtime.mini (Runtime Error Demo)</option>
+                        <option value="custom">✏️ Custom Program</option>
+                    </select>
+                </div>
+                <button id="run-btn" class="btn btn-primary">
+                    <span class="btn-icon">▶</span> Compile &amp; Run
+                </button>
+            </div>
+        </header>
+
+        <!-- Error Notification Banner -->
+        <div id="error-banner" class="error-banner hidden">
+            <div class="error-icon">⚠️</div>
+            <div class="error-content" id="error-content"></div>
+            <button class="error-close" id="error-close">×</button>
+        </div>
+
+        <!-- Main Workspace Split Grid -->
+        <main class="workspace-grid">
+            <!-- Left Side: Source Code Editor -->
+            <section class="pane editor-pane">
+                <div class="pane-header">
+                    <div class="pane-title">
+                        <span class="pane-icon">📝</span>
+                        <h2>Sudarshan Source Code</h2>
+                    </div>
+                    <div class="pane-tools">
+                        <button id="clear-btn" class="btn-sm btn-ghost" title="Clear Editor">Clear</button>
+                        <button id="copy-btn" class="btn-sm btn-ghost" title="Copy Code">Copy</button>
+                    </div>
+                </div>
+                <div class="editor-container">
+                    <div class="line-numbers" id="line-numbers">1</div>
+                    <textarea id="code-editor" class="code-editor" spellcheck="false" placeholder="// Type your Sudarshan code here...&#10;&#10;int a = 15;&#10;int b = a + 25;&#10;print(b);"></textarea>
+                </div>
+            </section>
+
+            <!-- Right Side: Compilation Output Visualizer Tabs -->
+            <section class="pane visualizer-pane">
+                <div class="tab-bar">
+                    <button class="tab-btn active" data-tab="tab-tokens">
+                        <span class="tab-badge">1</span> Tokens
+                    </button>
+                    <button class="tab-btn" data-tab="tab-ast">
+                        <span class="tab-badge">2</span> AST Tree
+                    </button>
+                    <button class="tab-btn" data-tab="tab-symtable">
+                        <span class="tab-badge">3</span> Symbol Table
+                    </button>
+                    <button class="tab-btn" data-tab="tab-semantics">
+                        <span class="tab-badge">4</span> Semantics
+                    </button>
+                    <button class="tab-btn" data-tab="tab-raw-ir">
+                        <span class="tab-badge">5</span> Raw TAC
+                    </button>
+                    <button class="tab-btn" data-tab="tab-opt-ir">
+                        <span class="tab-badge">6</span> Opt TAC
+                    </button>
+                    <button class="tab-btn" data-tab="tab-opt-behavior">
+                        <span class="tab-badge">7</span> Opt Behavior
+                    </button>
+                    <button class="tab-btn" data-tab="tab-console">
+                        <span class="tab-badge">8</span> Output
+                    </button>
+                </div>
+
+                <div class="tab-content-container">
+                    <!-- Tab 1: Tokens -->
+                    <div class="tab-pane active" id="tab-tokens">
+                        <div class="pane-subheading-bar">
+                            <div class="pane-subheading">1. Expected lexical tokens</div>
+                            <button class="btn-sm btn-ghost copy-text-btn" data-target="tokens-view">Copy</button>
+                        </div>
+                        <div class="code-view" id="tokens-view">Run compilation to inspect tokens...</div>
+                    </div>
+
+                    <!-- Tab 2: AST -->
+                    <div class="tab-pane" id="tab-ast">
+                        <div class="pane-subheading-bar">
+                            <div class="pane-subheading">2. Expected AST</div>
+                            <div class="view-toggle">
+                                <button id="ast-view-graph-btn" class="toggle-btn active">🌳 Graph Tree</button>
+                                <button id="ast-view-cards-btn" class="toggle-btn">📋 List View</button>
+                                <button id="ast-view-text-btn" class="toggle-btn">📄 Text View</button>
+                            </div>
+                        </div>
+                        <div class="ast-graph-container" id="ast-graph-container">
+                            <svg id="ast-svg" class="ast-svg"></svg>
+                        </div>
+                        <div class="ast-visualizer hidden" id="ast-tree-view"></div>
+                        <pre class="code-view hidden" id="ast-text-view"></pre>
+                    </div>
+
+                    <!-- Tab 3: Symbol Table -->
+                    <div class="tab-pane" id="tab-symtable">
+                        <div class="pane-subheading-bar">
+                            <div class="pane-subheading">3. Expected Symbol table</div>
+                            <button class="btn-sm btn-ghost copy-text-btn" data-target="symtable-raw-text">Copy</button>
+                        </div>
+                        <p class="section-desc" id="symtable-desc">A scope-aware table showing tracked identifiers, types, scopes, and declaration locations:</p>
+                        
+                        <div class="table-wrapper" id="symtable-view">
+                            <table class="sym-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Kind</th>
+                                        <th>Scope</th>
+                                        <th>Value/Binding</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="symtable-body">
+                                    <tr><td colspan="5" class="empty-state">No symbols recorded yet.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="code-box-wrapper">
+                            <div class="code-box-header">
+                                <span class="code-box-title">text</span>
+                                <button class="copy-icon-btn" data-target="symtable-raw-text" title="Copy text">📋</button>
+                            </div>
+                            <pre class="code-view" id="symtable-raw-text">Run compilation to inspect symbol table...</pre>
+                        </div>
+
+                        <p class="scope-note" id="symtable-scope-note">Variables declared within loops or conditional blocks are restricted to their local block scope.</p>
+                    </div>
+
+                    <!-- Tab 4: Semantics -->
+                    <div class="tab-pane" id="tab-semantics">
+                        <div class="pane-subheading-bar">
+                            <div class="pane-subheading">4. Expected semantic-analysis result</div>
+                            <button class="btn-sm btn-ghost copy-text-btn" data-target="semantics-raw-text">Copy</button>
+                        </div>
+                        
+                        <div id="semantics-status-banner" class="status-banner success">
+                            <span class="status-icon">✓</span>
+                            <span id="semantics-status-text">Semantic analysis: SUCCESS</span>
+                        </div>
+
+                        <div class="checks-wrapper">
+                            <div class="checks-title">Checks passed:</div>
+                            <ul class="checks-list" id="semantics-checks-list">
+                                <li>Run compilation to run semantic checks...</li>
+                            </ul>
+                        </div>
+
+                        <div class="code-box-wrapper">
+                            <div class="code-box-header">
+                                <span class="code-box-title">text</span>
+                                <button class="copy-icon-btn" data-target="semantics-raw-text" title="Copy text">📋</button>
+                            </div>
+                            <pre class="code-view" id="semantics-raw-text">Semantic analysis: SUCCESS</pre>
+                        </div>
+                    </div>
+
+                    <!-- Tab 5: Raw TAC -->
+                    <div class="tab-pane" id="tab-raw-ir">
+                        <div class="pane-subheading-bar">
+                            <div class="pane-subheading">5. Raw Three-Address Code (TAC)</div>
+                            <button class="btn-sm btn-ghost copy-text-btn" data-target="ir-view">Copy</button>
+                        </div>
+                        <p class="section-desc">Unoptimized Intermediate Representation (-O0) generated from the AST with temporary registers.</p>
+                        <div class="code-view llvm-ir" id="ir-view">Run compilation to generate Intermediate Representation...</div>
+                    </div>
+
+                    <!-- Tab 6: Expected Optimized TAC -->
+                    <div class="tab-pane" id="tab-opt-ir">
+                        <div class="pane-subheading-bar">
+                            <div class="pane-subheading">6. Expected optimized IR (TAC)</div>
+                            <button class="btn-sm btn-ghost copy-text-btn" data-target="opt-ir-view">Copy</button>
+                        </div>
+                        <p class="section-desc">Optimized Three-Address Code with constant folding, algebraic simplification, and dead code elimination.</p>
+                        <div class="code-view llvm-ir" id="opt-ir-view">Run compilation to generate optimized IR...</div>
+                    </div>
+
+                    <!-- Tab 7: Expected Optimized Behavior -->
+                    <div class="tab-pane" id="tab-opt-behavior">
+                        <div class="pane-subheading-bar">
+                            <div class="pane-subheading">7. Expected optimized behavior</div>
+                            <button class="btn-sm btn-ghost copy-text-btn" data-target="opt-behavior-text">Copy</button>
+                        </div>
+                        <p class="section-desc" id="opt-desc">With optimization, the Sudarshan compiler simplifies constant arithmetic expressions and eliminates redundant quadruples.</p>
+                        
+                        <p class="section-desc-bold">The important observable behavior is:</p>
+                        <div class="code-box-wrapper">
+                            <div class="code-box-header">
+                                <span class="code-box-title">text</span>
+                                <button class="copy-icon-btn" data-target="opt-behavior-text" title="Copy text">📋</button>
+                            </div>
+                            <pre class="code-view" id="opt-behavior-text">Run compilation to inspect optimized semantics...</pre>
+                        </div>
+                    </div>
+
+                    <!-- Tab 8: Output Console -->
+                    <div class="tab-pane" id="tab-console">
+                        <div class="pane-subheading-bar">
+                            <div class="pane-subheading">8. Expected program output</div>
+                            <button class="btn-sm btn-ghost copy-text-btn" data-target="console-output">Copy</button>
+                        </div>
+                        <div class="terminal-box">
+                            <div class="terminal-header">
+                                <span class="dot red"></span>
+                                <span class="dot yellow"></span>
+                                <span class="dot green"></span>
+                                <span class="terminal-title">sudarshan-vm --run</span>
+                            </div>
+                            <div class="terminal-body" id="console-output">
+                                <span class="terminal-muted">Click "Compile &amp; Run" to execute code.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js?v=3.0.0"></script>
+</body>
+</html>
