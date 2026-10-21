@@ -4,13 +4,15 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![React 18](https://img.shields.io/badge/Frontend-React_18_%2B_Vite_%2B_TS-61DAFB?style=for-the-badge&logo=react&logoColor=black)](frontend/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI_%2B_Uvicorn-009688?style=for-the-badge&logo=fastapi&logoColor=white)](backend/)
-[![Build Status](https://img.shields.io/badge/Tests-59%20Passed-success?style=for-the-badge)](tests/)
+[![Build Status](https://img.shields.io/badge/Tests-69%20Passed-success?style=for-the-badge)](tests/)
+[![Live Demo](https://img.shields.io/badge/Live_Studio-Vercel-success?style=for-the-badge&logo=vercel)](https://compilerproject-xi.vercel.app)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 
 **Compiler Design Laboratory Individual Project**  
 **Student Name**: Lakshya Singh | **Reg No.**: 24BDS0054  
 **Project Title**: Sudarshan: An End-to-End Compiler, Virtual Machine, and Interactive Compiler Studio  
-**GitHub Repository**: [https://github.com/laksh1357/Sudarshan_Compiler](https://github.com/laksh1357/Sudarshan_Compiler)
+**GitHub Repository**: [https://github.com/laksh1357/Sudarshan_Compiler](https://github.com/laksh1357/Sudarshan_Compiler)  
+**Live Studio Web App**: [https://compilerproject-xi.vercel.app](https://compilerproject-xi.vercel.app)
 
 ---
 
@@ -106,7 +108,7 @@ factor     -> NUMBER | ID | '(' expr ')' | '-' factor
 | **Frontend Framework** | React 18, TypeScript, Vite | Single-page reactive application |
 | **Code Editor** | Monaco Editor (`@monaco-editor/react`) | In-browser code editing, custom Sudarshan syntax highlighter & markers |
 | **Styling & Icons** | Tailwind CSS, Lucide React | Developer-tool dark theme inspired by MiniLLVM |
-| **Automated Testing** | `unittest`, `pytest`, `httpx` | 45 compiler tests + 14 backend API integration tests (59 total) |
+| **Automated Testing** | `unittest`, `pytest`, `httpx` | 55 compiler tests + 14 backend API integration tests (69 total) |
 
 ---
 
@@ -274,16 +276,15 @@ curl -X POST http://127.0.0.1:8000/api/compile-run \
 
 ## 9. Testing & Quality Assurance
 
-The project includes **59 automated tests** covering core compiler units, CLI regressions, AST graph export, API endpoints, execution sandboxing, and end-to-end compiler workflows:
+The project includes **69 automated tests** covering core compiler units, CLI regressions, AST graph export, API endpoints, execution sandboxing, and end-to-end compiler workflows:
 
 ```bash
 # Run all tests (Unit Tests + API Tests)
-PYTHONPATH=. .venv/bin/pytest backend/tests/ -v
-.venv/bin/python -m unittest discover -s tests -p "test_*.py" -v
+PYTHONPATH=. .venv/bin/pytest --import-mode=importlib tests/ backend/tests/test_api.py -v
 ```
 
 ### Test Coverage Highlights:
-- **Unit Tests (45 Tests)**: Lexer tokenization, operator precedence, scope isolation, shadowing, AST generation, algebraic identity simplification, constant folding, dead-code elimination, VM execution semantics, and exception inheritance.
+- **Unit Tests (55 Tests)**: Lexer tokenization, operator precedence, scope isolation, shadowing, AST generation, algebraic identity simplification, constant folding, dead-code elimination, VM execution semantics, security subsystem, and exception inheritance.
 - **API Tests (14 Tests)**: Health check, example catalog, phase-by-phase non-fabricated responses, lexical/syntax/semantic error trapping, runtime division-by-zero traps, infinite loop step limits, payload validation, and full end-to-end compiler integration.
 
 ---
