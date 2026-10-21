@@ -20,6 +20,7 @@ if ROOT_DIR not in sys.path:
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from backend.app.compiler_service import compile_sudarshan
 
@@ -38,6 +39,20 @@ app.add_middleware(
 )
 
 
+# Middleware to normalize Vercel serverless rewritten paths
+class VercelPathNormalizer(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        path = request.scope.get("path", "")
+        # Normalize /api/index.py or /api/index to root or subpath
+        if path in ("/api/index.py", "/api/index", "/api/index.py/"):
+            request.scope["path"] = "/"
+        elif path.startswith("/api/index.py/"):
+            request.scope["path"] = path[len("/api/index.py"):]
+        return await call_next(request)
+
+app.add_middleware(VercelPathNormalizer)
+
+
 def load_example(filename: str) -> str:
     path = os.path.join(EXAMPLES_DIR, filename)
     if os.path.exists(path):
@@ -46,27 +61,45 @@ def load_example(filename: str) -> str:
     return ""
 
 
+INDEX_FILE = os.path.join(ROOT_DIR, "index.html")
+STYLE_FILE = os.path.join(ROOT_DIR, "style.css")
+APP_FILE = os.path.join(ROOT_DIR, "app.js")
+
+
 @app.get("/")
+@app.get("/index.html")
+@app.get("/api/index.py")
+@app.get("/api/index")
 def serve_index():
-    index_path = os.path.join(ROOT_DIR, "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path, media_type="text/html")
+    if os.path.exists(INDEX_FILE):
+        return FileResponse(INDEX_FILE, media_type="text/html")
+    # Fallback to frontend/dist/index.html if built
+    dist_index = os.path.join(ROOT_DIR, "frontend", "dist", "index.html")
+    if os.path.exists(dist_index):
+        return FileResponse(dist_index, media_type="text/html")
     return {"message": "Sudarshan Compiler Studio API", "status": "running"}
 
 
 @app.get("/style.css")
+@app.get("/api/style.css")
+@app.get("/api/index.py/style.css")
 def serve_css():
-    css_path = os.path.join(ROOT_DIR, "style.css")
-    return FileResponse(css_path, media_type="text/css")
+    if os.path.exists(STYLE_FILE):
+        return FileResponse(STYLE_FILE, media_type="text/css")
+    return JSONResponse(status_code=404, content={"detail": "style.css not found"})
 
 
 @app.get("/app.js")
+@app.get("/api/app.js")
+@app.get("/api/index.py/app.js")
 def serve_js():
-    js_path = os.path.join(ROOT_DIR, "app.js")
-    return FileResponse(js_path, media_type="application/javascript")
+    if os.path.exists(APP_FILE):
+        return FileResponse(APP_FILE, media_type="application/javascript")
+    return JSONResponse(status_code=404, content={"detail": "app.js not found"})
 
 
 @app.get("/api/health")
+@app.get("/health")
 def health():
     return {
         "status": "ok",
@@ -87,6 +120,8 @@ def health():
 
 
 @app.get("/api/presets")
+@app.get("/presets")
+@app.get("/api/index.py/presets")
 def get_presets() -> Dict[str, str]:
     """Returns curated presets mapping filenames to their source code."""
     presets = {
@@ -104,6 +139,7 @@ def get_presets() -> Dict[str, str]:
 
 
 @app.get("/api/examples")
+@app.get("/examples")
 def get_examples():
     """Alias for examples catalog."""
     from backend.app.routes.examples import get_examples as be_examples
@@ -111,6 +147,8 @@ def get_examples():
 
 
 @app.post("/api/compile")
+@app.post("/compile")
+@app.post("/api/index.py/compile")
 async def compile_code(request: Request):
     """
     Main compilation and execution endpoint.
@@ -223,6 +261,8 @@ async def compile_code(request: Request):
 
 
 @app.post("/api/compile-run")
+@app.post("/compile-run")
+@app.post("/api/index.py/compile-run")
 async def compile_run_compat(request: Request):
     """Backwards-compatibility route for compile-run."""
     return await compile_code(request)
