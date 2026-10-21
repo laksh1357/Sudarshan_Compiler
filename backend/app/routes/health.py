@@ -5,7 +5,7 @@ Health and Status Route for Sudarshan Compiler Studio.
 from fastapi import APIRouter
 from backend.app.schemas import HealthResponse
 
-router = APIRouter(prefix="/api", tags=["System"])
+router = APIRouter(tags=["System"])
 
 
 @router.get("/health", response_model=HealthResponse)

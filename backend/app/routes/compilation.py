@@ -8,7 +8,7 @@ from backend.app.schemas import (
 )
 from backend.app.compiler_service import compile_sudarshan
 
-router = APIRouter(prefix="/api", tags=["Compilation"])
+router = APIRouter(tags=["Compilation"])
 
 
 @router.post("/compile", response_model=CompilationResponse)

@@ -7,7 +7,7 @@ from typing import List, Dict
 from fastapi import APIRouter
 from backend.app.schemas import ExampleItem
 
-router = APIRouter(prefix="/api", tags=["Examples"])
+router = APIRouter(tags=["Examples"])
 
 EXAMPLES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../examples"))
 
