@@ -62,8 +62,21 @@ app.include_router(examples.router, prefix="")
 app.include_router(compilation.router, prefix="")
 
 
-@app.get("/", tags=["Root"])
-def root():
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+
+DIST_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../frontend/dist"))
+INDEX_HTML = os.path.join(DIST_DIR, "index.html")
+
+# Mount frontend assets if compiled on disk
+if os.path.exists(DIST_DIR):
+    assets_dir = os.path.join(DIST_DIR, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="static_assets")
+
+
+@app.get("/api", tags=["Root"])
+def api_root():
     return {
         "message": "Welcome to Sudarshan Compiler Studio API",
         "version": "1.0.0",
@@ -76,3 +89,18 @@ def root():
             "run": "POST /api/run"
         }
     }
+
+
+@app.get("/index.html", include_in_schema=False)
+async def serve_index():
+    if os.path.exists(INDEX_HTML):
+        return FileResponse(INDEX_HTML)
+    return api_root()
+
+
+@app.get("/", tags=["Root"])
+def root():
+    if os.path.exists(INDEX_HTML):
+        return FileResponse(INDEX_HTML)
+    return api_root()
+
