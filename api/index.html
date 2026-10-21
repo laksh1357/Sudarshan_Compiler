@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudarshan Compiler Studio - Interactive Compiler IDE</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+:root {
+    --bg-main: #0b0f19;
+    --bg-card: #131b2e;
+    --bg-card-hover: #1c2742;
+    --bg-editor: #090d16;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-glow: rgba(99, 102, 241, 0.3);
+    
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --primary-glow: rgba(99, 102, 241, 0.4);
+    
+    --accent: #a855f7;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    
+    --text-main: #f3f4f6;
+    --text-muted: #9ca3af;
+    --text-dim: #6b7280;
+    
+    --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, Consolas, monospace;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: var(--font-sans);
+    height: 100vh;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Header Navbar */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 1.25rem;
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 0 15px var(--primary-glow);
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.logo-text h1 {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.sub-title {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+/* Compiler Pipeline Tracker */
+.compiler-pipeline {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 0.3rem 0.65rem;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.compiler-pipeline::-webkit-scrollbar {
+    display: none;
+}
+
+.pipeline-step {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.pipeline-step:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.pipeline-step.active {
+    color: #ffffff;
+    background: rgba(99, 102, 241, 0.25);
+    border: 1px solid rgba(99, 102, 241, 0.5);
+    font-weight: 600;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+}
+
+.pipeline-arrow {
+    color: var(--text-dim);
+    font-size: 0.65rem;
+    user-select: none;
+}
+
+/* Header Actions */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.preset-group {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.preset-dropdown {
+    background: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 0.4rem 0.75rem;
+    border-radius: 7px;
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.preset-dropdown:hover, .preset-dropdown:focus {
+    border-color: var(--primary);
+}
+
+/* Optimization Toggle Switch */
+.opt-toggle-group {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 0.3rem 0.6rem;
+    border-radius: 7px;
+    border: 1px solid var(--border-color);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    user-select: none;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 32px;
+    height: 18px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.15);
+    transition: .3s;
+    border-radius: 18px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 12px;
+    width: 12px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary);
+}
+
+input:checked + .slider:before {
+    transform: translateX(14px);
+}
+
+.opt-label {
+    font-weight: 500;
+    color: #e5e7eb;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 1rem;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 0.82rem;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+    color: #ffffff;
+    box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px var(--primary-glow);
+}
+
+.btn-primary:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.55rem;
+    font-size: 0.72rem;
+    border-radius: 6px;
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+}
+
+.btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
+}
+
+/* Error Banner */
+.error-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(239, 68, 68, 0.15);
+    border-bottom: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 0.6rem 1.25rem;
+    color: #fca5a5;
+    font-size: 0.85rem;
+}
+
+.error-banner.hidden {
+    display: none;
+}
+
+.error-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #fca5a5;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+/* Workspace Grid */
+.workspace-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 0.85rem;
+    padding: 0.75rem 1rem 1rem 1rem;
+    flex: 1;
+    height: calc(100vh - 58px);
+    overflow: hidden;
+}
+
+.pane {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+    min-height: 0;
+}
+
+.pane-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 0.95rem;
+    background: rgba(0, 0, 0, 0.28);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.pane-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pane-title h2 {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.pane-badge {
+    font-size: 0.65rem;
+    background: rgba(99, 102, 241, 0.15);
+    color: #a5b4fc;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+}
+
+/* Editor Container */
+.editor-container {
+    display: flex;
+    flex: 1;
+    height: 100%;
+    min-height: 0;
+    background: var(--bg-editor);
+    font-family: var(--font-mono);
+    overflow: hidden;
+    position: relative;
+}
+
+.line-numbers {
+    padding: 0.75rem 0.5rem;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    line-height: 22px;
+    text-align: right;
+    user-select: none;
+    border-right: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.25);
+    min-width: 44px;
+    overflow: hidden;
+}
+
+.code-editor {
+    flex: 1;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #e5e7eb;
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    line-height: 22px;
+    padding: 0.75rem 0.85rem;
+    resize: none;
+    white-space: pre;
+    tab-size: 4;
+}
+
+/* Visualizer Tabs */
+.tab-bar {
+    display: flex;
+    background: rgba(0, 0, 0, 0.35);
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-shrink: 0;
+}
+
+.tab-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.65rem 0.95rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.tab-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.tab-btn.active {
+    color: #ffffff;
+    border-bottom-color: var(--primary);
+    background: rgba(99, 102, 241, 0.12);
+    font-weight: 600;
+}
+    color: var(--text-main);
+    border-bottom-color: var(--primary);
+    background: rgba(99, 102, 241, 0.08);
+    font-weight: 600;
+}
+
+.tab-badge {
+    font-size: 0.65rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    font-weight: 700;
+}
+
+.tab-content-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+.pane-subheading-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.pane-subheading {
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 0.25rem;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 0.2rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.toggle-btn:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.toggle-btn.active {
+    background: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 2px 8px var(--primary-glow);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* SVG Graph Tree Visualizer */
+.ast-graph-container {
+    width: 100%;
+    height: calc(100vh - 230px);
+    background: var(--bg-editor);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    overflow: auto;
+    position: relative;
+}
+
+.ast-svg {
+    min-width: 100%;
+    min-height: 100%;
+    display: block;
+}
+
+.tree-edge {
+    stroke: rgba(99, 102, 241, 0.4);
+    stroke-width: 2;
+    fill: none;
+    transition: stroke 0.2s ease;
+}
+
+.tree-edge:hover {
+    stroke: var(--accent);
+    stroke-width: 3;
+}
+
+.tree-node-group {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.tree-node-group:hover rect {
+    stroke: var(--accent);
+    filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.5));
+}
+
+.tree-node-rect {
+    fill: #1e1b4b;
+    stroke: var(--primary);
+    stroke-width: 1.5;
+    rx: 8;
+    ry: 8;
+    transition: all 0.2s ease;
+}
+
+.tree-node-rect.stmt {
+    fill: #131b2e;
+    stroke: #3b82f6;
+}
+
+.tree-node-rect.expr {
+    fill: #1f1d36;
+    stroke: #a855f7;
+}
+
+.tree-node-rect.leaf {
+    fill: #064e3b;
+    stroke: #10b981;
+}
+
+.tree-node-text {
+    fill: #f3f4f6;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-anchor: middle;
+}
+
+.tree-node-subtext {
+    fill: #9ca3af;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-anchor: middle;
+}
+
+/* AST Cards View */
+.ast-visualizer {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+}
+
+.ast-tree {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ast-node-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--primary);
+    padding: 0.5rem 0.8rem;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+}
+
+.ast-node-title {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.ast-node-detail {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+/* Views & Output */
+.code-view {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    background: var(--bg-editor);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    color: #d1d5db;
+    white-space: pre-wrap;
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+}
+
+.llvm-ir {
+    color: #93c5fd;
+}
+
+/* Table Wrapper & 5-Column Symbol Table */
+.table-wrapper {
+    background: var(--bg-editor);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    overflow-x: auto;
+    margin-bottom: 0.75rem;
+}
+
+.sym-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    text-align: left;
+}
+
+.sym-table th {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.6rem 0.8rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sym-table td {
+    padding: 0.65rem 0.8rem;
+    border-bottom: 1px solid var(--border-color);
+    font-family: var(--font-mono);
+}
+
+.badge-type {
+    color: #818cf8;
+    font-weight: 600;
+}
+
+.badge-kind {
+    color: #a78bfa;
+}
+
+.badge-scope {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+}
+
+.badge-value {
+    color: #34d399;
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--text-dim);
+    padding: 2rem;
+}
+
+/* Section Descriptions */
+.section-desc {
+    color: #9ca3af;
+    font-size: 0.88rem;
+    margin-bottom: 0.85rem;
+    line-height: 1.5;
+}
+
+.section-desc-bold {
+    color: #f3f4f6;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Monospace Code Box Wrapper */
+.code-box-wrapper {
+    background: #0d1117;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 0.75rem 0;
+}
+
+.code-box-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.8rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.code-box-title {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: #9ca3af;
+    text-transform: lowercase;
+}
+
+.copy-icon-btn {
+    background: transparent;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.copy-icon-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.code-box-wrapper .code-view {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    margin: 0;
+    padding: 0.85rem 1rem;
+    max-height: 380px;
+    color: #e5e7eb;
+}
+
+/* Scope Footnote Note */
+.scope-note {
+    color: #9ca3af;
+    font-size: 0.85rem;
+    margin-top: 0.75rem;
+    line-height: 1.5;
+}
+
+.scope-note code {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 0.15rem 0.35rem;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    color: #e5e7eb;
+}
+
+/* Semantic Analysis Status Banner & Checklist */
+.status-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.status-banner.success {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #10b981;
+}
+
+.status-banner.error {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+.status-icon {
+    font-size: 1.1rem;
+}
+
+.checks-wrapper {
+    margin-bottom: 1rem;
+}
+
+.checks-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #f3f4f6;
+    margin-bottom: 0.5rem;
+}
+
+.checks-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.checks-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: #d1d5db;
+    line-height: 1.4;
+}
+
+.check-icon {
+    color: #10b981;
+    font-weight: bold;
+}
+
+.check-icon.error {
+    color: #ef4444;
+}
+
+/* Terminal Console */
+.terminal-box {
+    background: #000000;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    font-family: var(--font-mono);
+}
+
+.terminal-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.8rem;
+    background: #111827;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.dot.red { background: #ef4444; }
+.dot.yellow { background: #f59e0b; }
+.dot.green { background: #10b981; }
+
+.terminal-title {
+    margin-left: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+.terminal-body {
+    padding: 1rem;
+    font-size: 0.9rem;
+    color: #10b981;
+    min-height: 120px;
+    line-height: 1.5;
+}
+
+.terminal-muted {
+    color: var(--text-dim);
+}
+
+/* Responsive Layout */
+@media (max-width: 1024px) {
+    body {
+        overflow-y: auto;
+        height: auto;
+    }
+
+    .app-container {
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .navbar {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .compiler-pipeline {
+        order: 3;
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .workspace-grid {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+        gap: 1.25rem;
+        padding: 0.75rem;
+    }
+
+    .pane.editor-pane {
+        height: 480px;
+    }
+
+    .pane.visualizer-pane {
+        min-height: 550px;
+        height: auto;
+    }
+
+    .tab-content-container {
+        max-height: 600px;
+    }
+}
+
+</style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation Header -->
+        <header class="navbar">
+            <div class="brand">
+                <div class="logo-icon">⚡</div>
+                <div class="logo-text">
+                    <h1>Sudarshan Studio</h1>
+                    <span class="sub-title">Sudarshan Language Compiler &amp; TAC Engine</span>
+                </div>
+            </div>
+            
+            <div class="compiler-pipeline">
+                <div class="pipeline-step active" id="step-tokens">1. Tokens</div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step" id="step-ast">2. AST</div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step" id="step-symtable">3. Symbol Table</div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step" id="step-semantics">4. Semantics</div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step" id="step-raw-ir">5. Raw TAC</div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step" id="step-opt-ir">6. Opt TAC</div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step" id="step-opt-behavior">7. Opt Behavior</div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step" id="step-console">8. Output</div>
+            </div>
+
+            <div class="header-actions">
+                <div class="preset-group">
+                    <label for="preset-select">Samples:</label>
+                    <select id="preset-select" class="preset-dropdown">
+                        <option value="valid.mini">valid.mini (While Loop &amp; Branches)</option>
+                        <option value="opt_test.mini">opt_test.mini (Constant Folding)</option>
+                        <option value="nested_scope.mini">nested_scope.mini (Block Scoping)</option>
+                        <option value="algebraic.mini">algebraic.mini (Algebraic Identities)</option>
+                        <option value="loop_factorial.mini">loop_factorial.mini (Factorial)</option>
+                        <option value="error_syntax.mini">error_syntax.mini (Syntax Error Demo)</option>
+                        <option value="error_semantic.mini">error_semantic.mini (Semantic Error Demo)</option>
+                        <option value="error_lexical.mini">error_lexical.mini (Lexer Error Demo)</option>
+                        <option value="error_runtime.mini">error_runtime.mini (Runtime Error Demo)</option>
+                        <option value="custom">✏️ Custom Program</option>
+                    </select>
+                </div>
+                <div class="opt-toggle-group">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="opt-toggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="opt-label">⚡ Optimize (-O1)</span>
+                </div>
+                <button id="run-btn" class="btn btn-primary">
+                    <span class="btn-icon">▶</span> Compile &amp; Run
+                </button>
+            </div>
+        </header>
+
+        <!-- Error Notification Banner -->
+        <div id="error-banner" class="error-banner hidden">
+            <div class="error-icon">⚠️</div>
+            <div class="error-content" id="error-content"></div>
+            <button class="error-close" id="error-close">×</button>
+        </div>
+
+        <!-- Main Workspace Split Grid -->
+        <main class="workspace-grid">
+            <!-- Left Side: Source Code Editor -->
+            <section class="pane editor-pane">
+                <div class="pane-header">
+                    <div class="pane-title">
+                        <span class="pane-icon">📝</span>
+                        <h2>Sudarshan Source Code</h2>
+                    </div>
+                    <div class="pane-tools">
+                        <button id="clear-btn" class="btn-sm btn-ghost" title="Clear Editor">Clear</button>
+                        <button id="copy-btn" class="btn-sm btn-ghost" title="Copy Code">Copy</button>
+                    </div>
+                </div>
+                <div class="editor-container">
+                    <div class="line-numbers" id="line-numbers">1</div>
+                    <textarea id="code-editor" class="code-editor" spellcheck="false" placeholder="// Type your Sudarshan code here...&#10;&#10;int a = 15;&#10;int b = a + 25;&#10;print(b);"></textarea>
+                </div>
+            </section>
+
+            <!-- Right Side: Compilation Output Visualizer Tabs -->
+            <section class="pane visualizer-pane">
+                <div class="tab-bar">
+                    <button class="tab-btn active" data-tab="tab-tokens">
+                        <span class="tab-badge">1</span> Tokens
+                    </button>
+                    <button class="tab-btn" data-tab="tab-ast">
+                        <span class="tab-badge">2</span> AST Tree
+                    </button>
+                    <button class="tab-btn" data-tab="tab-symtable">
+                        <span class="tab-badge">3</span> Symbol Table
+                    </button>
+                    <button class="tab-btn" data-tab="tab-semantics">
+                        <span class="tab-badge">4</span> Semantics
+                    </button>
+                    <button class="tab-btn" data-tab="tab-raw-ir">
+                        <span class="tab-badge">5</span> Raw TAC
+                    </button>
+                    <button class="tab-btn" data-tab="tab-opt-ir">
+                        <span class="tab-badge">6</span> Opt TAC
+                    </button>
+                    <button class="tab-btn" data-tab="tab-opt-behavior">
+                        <span class="tab-badge">7</span> Opt Behavior
+                    </button>
+                    <button class="tab-btn" data-tab="tab-console">
+                        <span class="tab-badge">8</span> Output
+                    </button>
+                </div>
+
+                <div class="tab-content-container">
+                    <!-- Tab 1: Tokens -->
+                    <div class="tab-pane active" id="tab-tokens">
+                        <div class="pane-subheading-bar">
+                            <div class="pane-subheading">1. Expected lexical tokens</div>
+                            <button class="btn-sm btn-ghost copy-text-btn" data-target="tokens-view">Copy</button>
+                        </div>
+                        <div class="code-view" id="tokens-view">Run compilation to inspect tokens...</div>
+                    </div>
+
+                    <!-- Tab 2: AST -->
+                    <div class="tab-pane" id="tab-ast">
+                        <div class="pane-subheading-bar">
+                            <div class="pane-subheading">2. Expected AST</div>
+                            <div class="view-toggle">
+                                <button id="ast-view-graph-btn" class="toggle-btn active">🌳 Graph Tree</button>
+                                <button id="ast-view-cards-btn" class="toggle-btn">📋 List View</button>
+                                <button id="ast-view-text-btn" class="toggle-btn">📄 Text View</button>
+                            </div>
+                        </div>
+                        <div class="ast-graph-container" id="ast-graph-container">
+                            <svg id="ast-svg" class="ast-svg"></svg>
+                        </div>
+                        <div class="ast-visualizer hidden" id="ast-tree-view"></div>
+                        <pre class="code-view hidden" id="ast-text-view"></pre>
+                    </div>
+
+                    <!-- Tab 3: Symbol Table -->
+                    <div class="tab-pane" id="tab-symtable">
+                        <div class="pane-subheading-bar">
+                            <div class="pane-subheading">3. Expected Symbol table</div>
+                            <button class="btn-sm btn-ghost copy-text-btn" data-target="symtable-raw-text">Copy</button>
+                        </div>
+                        <p class="section-desc" id="symtable-desc">A scope-aware table showing tracked identifiers, types, scopes, and declaration locations:</p>
+                        
+                        <div class="table-wrapper" id="symtable-view">
+                            <table class="sym-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Kind</th>
+                                        <th>Scope</th>
+                                        <th>Value/Binding</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="symtable-body">
+                                    <tr><td colspan="5" class="empty-state">No symbols recorded yet.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="code-box-wrapper">
+                            <div class="code-box-header">
+                                <span class="code-box-title">text</span>
+                                <button class="copy-icon-btn" data-target="symtable-raw-text" title="Copy text">📋</button>
+                            </div>
+                            <pre class="code-view" id="symtable-raw-text">Run compilation to inspect symbol table...</pre>
+                        </div>
+
+                        <p class="scope-note" id="symtable-scope-note">Variables declared within loops or conditional blocks are restricted to their local block scope.</p>
+                    </div>
+
+                    <!-- Tab 4: Semantics -->
+                    <div class="tab-pane" id="tab-semantics">
+                        <div class="pane-subheading-bar">
+                            <div class="pane-subheading">4. Expected semantic-analysis result</div>
+                            <button class="btn-sm btn-ghost copy-text-btn" data-target="semantics-raw-text">Copy</button>
+                        </div>
+                        
+                        <div id="semantics-status-banner" class="status-banner success">
+                            <span class="status-icon">✓</span>
+                            <span id="semantics-status-text">Semantic analysis: SUCCESS</span>
+                        </div>
+
+                        <div class="checks-wrapper">
+                            <div class="checks-title">Checks passed:</div>
+                            <ul class="checks-list" id="semantics-checks-list">
+                                <li>Run compilation to run semantic checks...</li>
+                            </ul>
+                        </div>
+
+                        <div class="code-box-wrapper">
+                            <div class="code-box-header">
+                                <span class="code-box-title">text</span>
+                                <button class="copy-icon-btn" data-target="semantics-raw-text" title="Copy text">📋</button>
+                            </div>
+                            <pre class="code-view" id="semantics-raw-text">Semantic analysis: SUCCESS</pre>
+                        </div>
+                    </div>
+
+                    <!-- Tab 5: Raw TAC -->
+                    <div class="tab-pane" id="tab-raw-ir">
+                        <div class="pane-subheading-bar">
+                            <div class="pane-subheading">5. Raw Three-Address Code (TAC)</div>
+                            <button class="btn-sm btn-ghost copy-text-btn" data-target="ir-view">Copy</button>
+                        </div>
+                        <p class="section-desc">Unoptimized Intermediate Representation (-O0) generated from the AST with temporary registers.</p>
+                        <div class="code-view llvm-ir" id="ir-view">Run compilation to generate Intermediate Representation...</div>
+                    </div>
+
+                    <!-- Tab 6: Expected Optimized TAC -->
+                    <div class="tab-pane" id="tab-opt-ir">
+                        <div class="pane-subheading-bar">
+                            <div class="pane-subheading">6. Expected optimized IR (TAC)</div>
+                            <button class="btn-sm btn-ghost copy-text-btn" data-target="opt-ir-view">Copy</button>
+                        </div>
+                        <p class="section-desc">Optimized Three-Address Code with constant folding, algebraic simplification, and dead code elimination.</p>
+                        <div class="code-view llvm-ir" id="opt-ir-view">Run compilation to generate optimized IR...</div>
+                    </div>
+
+                    <!-- Tab 7: Expected Optimized Behavior -->
+                    <div class="tab-pane" id="tab-opt-behavior">
+                        <div class="pane-subheading-bar">
+                            <div class="pane-subheading">7. Expected optimized behavior</div>
+                            <button class="btn-sm btn-ghost copy-text-btn" data-target="opt-behavior-text">Copy</button>
+                        </div>
+                        <p class="section-desc" id="opt-desc">With optimization, the Sudarshan compiler simplifies constant arithmetic expressions and eliminates redundant quadruples.</p>
+                        
+                        <p class="section-desc-bold">The important observable behavior is:</p>
+                        <div class="code-box-wrapper">
+                            <div class="code-box-header">
+                                <span class="code-box-title">text</span>
+                                <button class="copy-icon-btn" data-target="opt-behavior-text" title="Copy text">📋</button>
+                            </div>
+                            <pre class="code-view" id="opt-behavior-text">Run compilation to inspect optimized semantics...</pre>
+                        </div>
+                    </div>
+
+                    <!-- Tab 8: Output Console -->
+                    <div class="tab-pane" id="tab-console">
+                        <div class="pane-subheading-bar">
+                            <div class="pane-subheading">8. Expected program output</div>
+                            <button class="btn-sm btn-ghost copy-text-btn" data-target="console-output">Copy</button>
+                        </div>
+                        <div class="terminal-box">
+                            <div class="terminal-header">
+                                <span class="dot red"></span>
+                                <span class="dot yellow"></span>
+                                <span class="dot green"></span>
+                                <span class="terminal-title">sudarshan-vm --run</span>
+                            </div>
+                            <div class="terminal-body" id="console-output">
+                                <span class="terminal-muted">Click "Compile &amp; Run" to execute code.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+document.addEventListener("DOMContentLoaded", () => {
+    const editor = document.getElementById("code-editor");
+    const lineNumbers = document.getElementById("line-numbers");
+    const presetSelect = document.getElementById("preset-select");
+    const runBtn = document.getElementById("run-btn");
+    const clearBtn = document.getElementById("clear-btn");
+    const copyBtn = document.getElementById("copy-btn");
+    const optToggle = document.getElementById("opt-toggle");
+    
+    const errorBanner = document.getElementById("error-banner");
+    const errorContent = document.getElementById("error-content");
+    const errorClose = document.getElementById("error-close");
+    
+    const tabBtns = document.querySelectorAll(".tab-btn");
+    const tabPanes = document.querySelectorAll(".tab-pane");
+    
+    const tokensView = document.getElementById("tokens-view");
+    const astTreeView = document.getElementById("ast-tree-view");
+    const symtableBody = document.getElementById("symtable-body");
+    const irView = document.getElementById("ir-view");
+    const optIrView = document.getElementById("opt-ir-view");
+    const optBehaviorText = document.getElementById("opt-behavior-text");
+    const consoleOutput = document.getElementById("console-output");
+
+    let presetsData = {};
+    let currentAstJson = null;
+    let currentAstRaw = "";
+
+    // Sync line numbers
+    function updateLineNumbers() {
+        const lines = editor.value.split("\n").length;
+        lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join("<br>");
+    }
+
+    editor.addEventListener("input", updateLineNumbers);
+    editor.addEventListener("scroll", () => {
+        lineNumbers.scrollTop = editor.scrollTop;
+    });
+
+    // Support Tab key in editor (insert 4 spaces)
+    editor.addEventListener("keydown", (e) => {
+        if (e.key === "Tab") {
+            e.preventDefault();
+            const start = editor.selectionStart;
+            const end = editor.selectionEnd;
+            editor.value = editor.value.substring(0, start) + "    " + editor.value.substring(end);
+            editor.selectionStart = editor.selectionEnd = start + 4;
+            updateLineNumbers();
+        }
+    });
+
+    // Fetch presets from Python backend
+    fetch("/api/presets")
+        .then(res => res.json())
+        .then(presets => {
+            presetsData = presets;
+            const defaultKey = presets["valid.mini"] ? "valid.mini" : Object.keys(presets)[0];
+            if (defaultKey && presets[defaultKey]) {
+                presetSelect.value = defaultKey;
+                editor.value = presets[defaultKey];
+                updateLineNumbers();
+                compileCode();
+            }
+        })
+        .catch(err => {
+            console.warn("Could not load presets from /api/presets, fallback to default code:", err);
+            updateLineNumbers();
+            compileCode();
+        });
+
+    // Preset dropdown selection
+    presetSelect.addEventListener("change", (e) => {
+        const val = e.target.value;
+        if (val !== "custom" && presetsData[val]) {
+            editor.value = presetsData[val];
+            updateLineNumbers();
+            compileCode();
+        }
+    });
+
+    // Clear editor
+    clearBtn.addEventListener("click", () => {
+        editor.value = "";
+        presetSelect.value = "custom";
+        updateLineNumbers();
+    });
+
+    // Copy editor content
+    copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(editor.value);
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => copyBtn.textContent = "Copy", 1500);
+    });
+
+    // Close error banner
+    errorClose.addEventListener("click", () => {
+        errorBanner.classList.add("hidden");
+    });
+
+    // Tab switching helper
+    function activateTab(target) {
+        tabBtns.forEach(b => b.classList.toggle("active", b.dataset.tab === target));
+        tabPanes.forEach(p => p.classList.toggle("active", p.id === target));
+        
+        // Update header stepper active state
+        const reverseMap = {
+            "tab-tokens": "step-tokens",
+            "tab-ast": "step-ast",
+            "tab-symtable": "step-symtable",
+            "tab-semantics": "step-semantics",
+            "tab-raw-ir": "step-raw-ir",
+            "tab-opt-ir": "step-opt-ir",
+            "tab-opt-behavior": "step-opt-behavior",
+            "tab-console": "step-console"
+        };
+        const activeStepId = reverseMap[target];
+        document.querySelectorAll(".pipeline-step").forEach(step => {
+            step.classList.toggle("active", step.id === activeStepId);
+        });
+
+        if (target === "tab-ast") {
+            setTimeout(() => {
+                try { renderSVGTree(currentAstJson); } catch(e) { console.error(e); }
+            }, 50);
+        }
+    }
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+            activateTab(btn.dataset.tab);
+        });
+    });
+
+    // Compiler pipeline steps click navigation
+    const pipelineStepMap = {
+        "step-tokens": "tab-tokens",
+        "step-ast": "tab-ast",
+        "step-symtable": "tab-symtable",
+        "step-semantics": "tab-semantics",
+        "step-raw-ir": "tab-raw-ir",
+        "step-opt-ir": "tab-opt-ir",
+        "step-opt-behavior": "tab-opt-behavior",
+        "step-console": "tab-console"
+    };
+
+    Object.keys(pipelineStepMap).forEach(stepId => {
+        const stepEl = document.getElementById(stepId);
+        if (stepEl) {
+            stepEl.addEventListener("click", () => {
+                activateTab(pipelineStepMap[stepId]);
+            });
+        }
+    });
+
+    // Generic copy buttons (text and icon buttons)
+    document.querySelectorAll(".copy-text-btn, .copy-icon-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const targetId = btn.dataset.target;
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+                const text = targetEl.value !== undefined ? targetEl.value : (targetEl.innerText || targetEl.textContent);
+                navigator.clipboard.writeText(text);
+                const orig = btn.innerHTML;
+                const isIcon = btn.classList.contains("copy-icon-btn");
+                btn.innerHTML = isIcon ? "✓" : "Copied!";
+                setTimeout(() => { btn.innerHTML = orig; }, 1500);
+            }
+        });
+    });
+
+    // Compile code trigger
+    runBtn.addEventListener("click", () => {
+        compileCode();
+    });
+
+    if (optToggle) {
+        optToggle.addEventListener("change", () => {
+            compileCode();
+        });
+    }
+
+    function compileCode() {
+        const code = editor.value;
+        const optimize = optToggle ? optToggle.checked : true;
+        runBtn.innerHTML = `<span class="btn-icon">⏳</span> Compiling...`;
+        errorBanner.classList.add("hidden");
+
+        fetch("/api/compile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code, optimize })
+        })
+        .then(res => res.json())
+        .then(data => {
+            runBtn.innerHTML = `<span class="btn-icon">▶</span> Compile &amp; Run`;
+            
+            if (data.errors && data.errors.length > 0) {
+                showErrors(data.errors);
+            }
+
+            // 1. Render Tokens
+            try {
+                tokensView.textContent = data.tokens || "No tokens generated.";
+            } catch (e) { console.error("Error rendering tokens:", e); }
+
+            // 2. Render AST
+            try {
+                renderAST(data.ast_json, data.ast);
+            } catch (e) { console.error("Error rendering AST:", e); }
+
+            // 3. Render Symbol Table (5 columns + raw text + scope notes)
+            try {
+                renderSymbolTable(data.symbol_table_data, data.symbol_table, data.symbol_table_notes);
+            } catch (e) { console.error("Error rendering Symbol Table:", e); }
+
+            // 4. Render Semantic Analysis (banner + passed checks list + raw text)
+            try {
+                const isSuccess = data.success || (data.semantic_checks && data.semantic_checks.length > 0 && (!data.errors || data.errors.length === 0));
+                renderSemantics(isSuccess, data.semantic_checks, data.semantic_analysis, data.errors);
+            } catch (e) { console.error("Error rendering Semantics:", e); }
+
+            // 5. Render Raw TAC
+            try {
+                irView.textContent = data.raw_tac || data.llvm_ir || "; Intermediate Representation (TAC) halted or failed.";
+            } catch (e) { console.error("Error rendering Raw TAC:", e); }
+
+            // 6. Render Expected Optimized IR & Behavior
+            try {
+                renderOptimizedBehavior(data.optimized_behavior, data.optimized_ir);
+            } catch (e) { console.error("Error rendering Optimized Behavior:", e); }
+
+            // 7. Render Execution Console Output
+            try {
+                if (data.success) {
+                    consoleOutput.innerHTML = `<span class="terminal-text">${escapeHtml(data.output)}</span>`;
+                } else {
+                    consoleOutput.innerHTML = `<span style="color: #ef4444;">[Compilation Halted] Check errors banner above.</span>`;
+                }
+            } catch (e) { console.error("Error rendering Console:", e); }
+        })
+        .catch(err => {
+            runBtn.innerHTML = `<span class="btn-icon">▶</span> Compile &amp; Run`;
+            showErrors([err.message || "Failed to reach compilation server."]);
+        });
+    }
+
+    function showErrors(errors) {
+        errorContent.innerHTML = errors.map(err => `<div>• ${escapeHtml(err)}</div>`).join("");
+        errorBanner.classList.remove("hidden");
+    }
+
+    // AST View Toggles
+    const graphBtn = document.getElementById("ast-view-graph-btn");
+    const cardsBtn = document.getElementById("ast-view-cards-btn");
+    const textBtn = document.getElementById("ast-view-text-btn");
+    
+    const astGraphContainer = document.getElementById("ast-graph-container");
+    const astTextView = document.getElementById("ast-text-view");
+    const astSvg = document.getElementById("ast-svg");
+
+    graphBtn.addEventListener("click", () => setAstView("graph"));
+    cardsBtn.addEventListener("click", () => setAstView("cards"));
+    textBtn.addEventListener("click", () => setAstView("text"));
+
+    function setAstView(mode) {
+        graphBtn.classList.toggle("active", mode === "graph");
+        cardsBtn.classList.toggle("active", mode === "cards");
+        textBtn.classList.toggle("active", mode === "text");
+
+        astGraphContainer.classList.toggle("hidden", mode !== "graph");
+        astTreeView.classList.toggle("hidden", mode !== "cards");
+        astTextView.classList.toggle("hidden", mode !== "text");
+
+        try {
+            if (mode === "graph") renderSVGTree(currentAstJson);
+            else if (mode === "cards") renderASTCards(currentAstJson, currentAstRaw);
+            else if (mode === "text") astTextView.textContent = currentAstRaw || "No AST generated.";
+        } catch (e) {
+            console.error("View mode error:", e);
+        }
+    }
+
+    function renderAST(astJson, rawAstText) {
+        currentAstJson = astJson;
+        currentAstRaw = rawAstText;
+
+        try { renderSVGTree(astJson); } catch (e) { console.error(e); }
+        try { renderASTCards(astJson, rawAstText); } catch (e) { console.error(e); }
+        try { astTextView.textContent = rawAstText || "No AST generated."; } catch (e) { console.error(e); }
+    }
+
+    // Interactive SVG Tree Layout Renderer
+    function renderSVGTree(astJson) {
+        if (!astJson || !astSvg) return;
+        astSvg.innerHTML = "";
+
+        // Build simplified node tree
+        function buildNode(data) {
+            if (!data) return null;
+            let label = data.label || data.type || "Node";
+            let sublabel = data.line ? `Line ${data.line}` : "";
+            let category = "expr";
+            let children = [];
+
+            const t = data.type || "";
+
+            if (t === "Program" || t === "Block") {
+                label = t === "Program" ? "Root Program" : "Block";
+                sublabel = `${data.children ? data.children.length : 0} Stmts`;
+                category = "root";
+                if (data.children) children = data.children.map(buildNode);
+            } else if (t.includes("Declaration") || t === "VarDecl" || t === "DeclarationStmt") {
+                const varName = data.details?.name || data.name || data.label?.replace("Decl: ", "") || "";
+                label = `Decl: int ${varName}`;
+                category = "stmt";
+                if (data.children) children = data.children.map(buildNode);
+                else if (data.value) children = [buildNode(data.value)];
+            } else if (t.includes("Assignment") || t === "Assign" || t === "AssignmentStmt") {
+                const varName = data.details?.name || data.name || data.label?.replace("Assign: ", "") || "";
+                label = `Assign: ${varName}`;
+                category = "stmt";
+                if (data.children) children = data.children.map(buildNode);
+                else if (data.value) children = [buildNode(data.value)];
+            } else if (t.includes("Print") || t === "PrintStmt") {
+                label = "print()";
+                category = "stmt";
+                if (data.children) children = data.children.map(buildNode);
+                else if (data.value) children = [buildNode(data.value)];
+            } else if (t.includes("While") || t === "WhileStmt") {
+                label = "WhileLoop";
+                category = "stmt";
+                if (data.children) children = data.children.map(buildNode);
+            } else if (t.includes("If") || t === "IfStmt") {
+                label = "IfBranch";
+                category = "stmt";
+                if (data.children) children = data.children.map(buildNode);
+            } else if (t.includes("Binary") || t === "BinaryOp" || t === "BinaryExpr") {
+                const op = data.details?.operator || data.op || "+";
+                label = `Op: ${op}`;
+                category = "expr";
+                if (data.children) children = data.children.map(buildNode);
+                else {
+                    if (data.left) children.push(buildNode(data.left));
+                    if (data.right) children.push(buildNode(data.right));
+                }
+            } else if (t.includes("Unary") || t === "UnaryOp" || t === "UnaryExpr") {
+                const op = data.details?.operator || data.op || "-";
+                label = `Unary: ${op}`;
+                category = "expr";
+                if (data.children) children = data.children.map(buildNode);
+                else if (data.expr) children = [buildNode(data.expr)];
+            } else if (t.includes("Literal") || t === "Integer" || t === "IntegerExpr") {
+                const val = data.details?.value !== undefined ? data.details.value : (data.value !== undefined ? data.value : data.label);
+                label = `Val: ${val}`;
+                category = "leaf";
+            } else if (t.includes("Variable") || t === "VariableExpr" || t === "Identifier") {
+                const name = data.details?.name || data.name || data.label;
+                label = `Var: ${name}`;
+                category = "leaf";
+            } else {
+                if (data.children) children = data.children.map(buildNode);
+            }
+
+            return { label, sublabel, category, children: children.filter(Boolean) };
+        }
+
+        const treeRoot = buildNode(astJson);
+        if (!treeRoot) return;
+
+        // Compute Layout: Node positions (x, y)
+        const NODE_WIDTH = 130;
+        const NODE_HEIGHT = 44;
+        const LEVEL_GAP = 70;
+        const SIBLING_GAP = 20;
+
+        function calcSubtreeWidth(node) {
+            if (!node.children || node.children.length === 0) {
+                node.subtreeWidth = NODE_WIDTH + SIBLING_GAP;
+                return node.subtreeWidth;
+            }
+            let w = 0;
+            node.children.forEach(c => {
+                w += calcSubtreeWidth(c);
+            });
+            node.subtreeWidth = Math.max(w, NODE_WIDTH + SIBLING_GAP);
+            return node.subtreeWidth;
+        }
+
+        calcSubtreeWidth(treeRoot);
+
+        let maxDepth = 0;
+        function assignCoords(node, leftX, depth) {
+            maxDepth = Math.max(maxDepth, depth);
+            node.y = 40 + depth * (NODE_HEIGHT + LEVEL_GAP);
+
+            if (!node.children || node.children.length === 0) {
+                node.x = leftX + (node.subtreeWidth) / 2;
+            } else {
+                let curLeft = leftX;
+                node.children.forEach(c => {
+                    assignCoords(c, curLeft, depth + 1);
+                    curLeft += c.subtreeWidth;
+                });
+                const firstChild = node.children[0];
+                const lastChild = node.children[node.children.length - 1];
+                node.x = (firstChild.x + lastChild.x) / 2;
+            }
+        }
+
+        assignCoords(treeRoot, 20, 0);
+
+        const totalWidth = Math.max(treeRoot.subtreeWidth + 60, astGraphContainer.clientWidth || 800);
+        const totalHeight = 60 + (maxDepth + 1) * (NODE_HEIGHT + LEVEL_GAP);
+
+        astSvg.setAttribute("width", totalWidth);
+        astSvg.setAttribute("height", totalHeight);
+
+        // Draw Lines (Edges) first
+        function drawEdges(node) {
+            if (!node.children) return;
+            node.children.forEach(child => {
+                const x1 = node.x;
+                const y1 = node.y + NODE_HEIGHT / 2;
+                const x2 = child.x;
+                const y2 = child.y - NODE_HEIGHT / 2;
+                const midY = (y1 + y2) / 2;
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`);
+                path.setAttribute("class", "tree-edge");
+                astSvg.appendChild(path);
+
+                drawEdges(child);
+            });
+        }
+        drawEdges(treeRoot);
+
+        // Draw Nodes
+        function drawNodes(node) {
+            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            group.setAttribute("class", "tree-node-group");
+            group.setAttribute("transform", `translate(${node.x - NODE_WIDTH / 2}, ${node.y - NODE_HEIGHT / 2})`);
+
+            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            rect.setAttribute("width", NODE_WIDTH);
+            rect.setAttribute("height", NODE_HEIGHT);
+            rect.setAttribute("class", `tree-node-rect ${node.category}`);
+            group.appendChild(rect);
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", NODE_WIDTH / 2);
+            text.setAttribute("y", node.sublabel ? NODE_HEIGHT / 2 - 3 : NODE_HEIGHT / 2 + 4);
+            text.setAttribute("class", "tree-node-text");
+            text.textContent = node.label;
+            group.appendChild(text);
+
+            if (node.sublabel) {
+                const subtext = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                subtext.setAttribute("x", NODE_WIDTH / 2);
+                subtext.setAttribute("y", NODE_HEIGHT / 2 + 11);
+                subtext.setAttribute("class", "tree-node-subtext");
+                subtext.textContent = node.sublabel;
+                group.appendChild(subtext);
+            }
+
+            astSvg.appendChild(group);
+
+            if (node.children) {
+                node.children.forEach(drawNodes);
+            }
+        }
+        drawNodes(treeRoot);
+    }
+
+    function renderASTCards(astJson, rawAstText) {
+        if (!astJson) {
+            astTreeView.innerHTML = `<pre class="code-view">${escapeHtml(rawAstText || "No AST generated.")}</pre>`;
+            return;
+        }
+
+        let html = `<div class="ast-tree">`;
+        html += `<div class="ast-node-card">
+            <div class="ast-node-title">📁 Root Program</div>
+            <div class="ast-node-detail">${astJson.children ? astJson.children.length : 0} Statements</div>
+        </div>`;
+
+        if (astJson.children) {
+            astJson.children.forEach(child => {
+                html += renderASTChild(child, 1);
+            });
+        }
+        html += `</div>`;
+        astTreeView.innerHTML = html;
+    }
+
+    function renderASTChild(node, depth) {
+        const indent = depth * 20;
+        let title = node.label || node.type;
+        let detail = node.line ? `Line ${node.line}` : "";
+
+        let html = `<div style="margin-left: ${indent}px;" class="ast-node-card">
+            <div class="ast-node-title">${escapeHtml(title)}</div>
+            <div class="ast-node-detail">${escapeHtml(detail)}</div>
+        </div>`;
+
+        if (node.children) {
+            node.children.forEach(child => {
+                html += renderASTChild(child, depth + 1);
+            });
+        }
+        return html;
+    }
+
+    function renderSymbolTable(symbols, rawText, notes) {
+        const rawEl = document.getElementById("symtable-raw-text");
+        const notesEl = document.getElementById("symtable-scope-note");
+
+        if (rawEl) {
+            rawEl.textContent = rawText || "No symbols recorded.";
+        }
+
+        if (notesEl) {
+            if (notes) {
+                let formatted = escapeHtml(notes);
+                formatted = formatted.replace(/\b(while|if|for)\b/g, '<code>$1</code>');
+                formatted = formatted.replace(/\bvariable\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, 'variable <code>$1</code>');
+                notesEl.innerHTML = formatted;
+                notesEl.style.display = "block";
+            } else {
+                notesEl.style.display = "none";
+            }
+        }
+
+        if (!symbols || symbols.length === 0) {
+            symtableBody.innerHTML = `<tr><td colspan="5" class="empty-state">No symbols recorded.</td></tr>`;
+            return;
+        }
+
+        const rows = symbols.map(s => {
+            return `<tr>
+                <td><strong>${escapeHtml(s.name)}</strong></td>
+                <td><span class="badge-type">${escapeHtml(s.type)}</span></td>
+                <td><span class="badge-kind">${escapeHtml(s.kind)}</span></td>
+                <td><span class="badge-scope">${escapeHtml(s.scope)}</span></td>
+                <td><span class="badge-value">${escapeHtml(s.value)}</span></td>
+            </tr>`;
+        });
+        symtableBody.innerHTML = rows.join("");
+    }
+
+    function renderSemantics(success, checks, rawText, errors) {
+        const banner = document.getElementById("semantics-status-banner");
+        const statusText = document.getElementById("semantics-status-text");
+        const checksList = document.getElementById("semantics-checks-list");
+        const rawEl = document.getElementById("semantics-raw-text");
+
+        if (success) {
+            if (banner) {
+                banner.className = "status-banner success";
+                if (statusText) statusText.textContent = "Semantic analysis: SUCCESS";
+            }
+            if (checksList) {
+                if (checks && checks.length > 0) {
+                    checksList.innerHTML = checks.map(c => 
+                        `<li><span class="check-icon">✓</span> <span>${escapeHtml(c)}</span></li>`
+                    ).join("");
+                } else {
+                    checksList.innerHTML = `<li><span class="check-icon">✓</span> <span>All semantic verifications passed cleanly.</span></li>`;
+                }
+            }
+            if (rawEl) {
+                rawEl.textContent = rawText || "Semantic analysis: SUCCESS";
+            }
+        } else {
+            if (banner) {
+                banner.className = "status-banner error";
+                if (statusText) statusText.textContent = "Semantic analysis: FAILED";
+            }
+            if (checksList) {
+                const errItems = (errors && errors.length > 0) ? errors : ["Semantic analysis halted with errors."];
+                checksList.innerHTML = errItems.map(e => 
+                    `<li><span class="check-icon error">✗</span> <span>${escapeHtml(e)}</span></li>`
+                ).join("");
+            }
+            if (rawEl) {
+                rawEl.textContent = `Semantic analysis: FAILED\n\nErrors:\n` + (errors || []).map(e => `- ${e}`).join("\n");
+            }
+        }
+    }
+
+    function renderOptimizedBehavior(behaviorText, optimizedIr) {
+        if (optBehaviorText) {
+            optBehaviorText.textContent = behaviorText || "No optimized behavior generated.";
+        }
+        if (optIrView) {
+            optIrView.textContent = optimizedIr || "; Optimized IR not available.";
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return "";
+        return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+});
+
+</script>
+</body>
+</html>

@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const runBtn = document.getElementById("run-btn");
     const clearBtn = document.getElementById("clear-btn");
     const copyBtn = document.getElementById("copy-btn");
+    const optToggle = document.getElementById("opt-toggle");
     
     const errorBanner = document.getElementById("error-banner");
     const errorContent = document.getElementById("error-content");
@@ -172,15 +173,22 @@ document.addEventListener("DOMContentLoaded", () => {
         compileCode();
     });
 
+    if (optToggle) {
+        optToggle.addEventListener("change", () => {
+            compileCode();
+        });
+    }
+
     function compileCode() {
         const code = editor.value;
+        const optimize = optToggle ? optToggle.checked : true;
         runBtn.innerHTML = `<span class="btn-icon">⏳</span> Compiling...`;
         errorBanner.classList.add("hidden");
 
         fetch("/api/compile", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ code })
+            body: JSON.stringify({ code, optimize })
         })
         .then(res => res.json())
         .then(data => {

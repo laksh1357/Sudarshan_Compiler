@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/index.py": {
-      "includeFiles": "src/**,backend/**,examples/**,index.html,style.css,app.js"
+      "includeFiles": "src/**,backend/**,examples/**,index.html,style.css,app.js,api/**"
     }
   },
   "rewrites": [

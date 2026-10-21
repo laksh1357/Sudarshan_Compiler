@@ -18,7 +18,7 @@ if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import HTMLResponse, Response, JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -43,8 +43,8 @@ app.add_middleware(
 class VercelPathNormalizer(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.scope.get("path", "")
-        # Normalize /api/index.py or /api/index to root or subpath
-        if path in ("/api/index.py", "/api/index", "/api/index.py/"):
+        # Normalize /api/index.py, /api/index, /api, or trailing slashes to root
+        if path in ("/api/index.py", "/api/index", "/api/index.py/", "/api", "/api/"):
             request.scope["path"] = "/"
         elif path.startswith("/api/index.py/"):
             request.scope["path"] = path[len("/api/index.py"):]
@@ -61,41 +61,72 @@ def load_example(filename: str) -> str:
     return ""
 
 
-INDEX_FILE = os.path.join(ROOT_DIR, "index.html")
-STYLE_FILE = os.path.join(ROOT_DIR, "style.css")
-APP_FILE = os.path.join(ROOT_DIR, "app.js")
+def read_static_file(filename: str) -> str:
+    """Helper to locate and read static files across local, dist, and Vercel lambda paths."""
+    candidates = [
+        os.path.join(ROOT_DIR, filename),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), filename),
+        os.path.join(ROOT_DIR, "frontend", "dist", filename),
+        os.path.join(ROOT_DIR, "frontend", filename),
+        os.path.join(os.getcwd(), filename),
+        filename
+    ]
+    for c in candidates:
+        if os.path.exists(c) and os.path.isfile(c):
+            try:
+                with open(c, "r", encoding="utf-8") as f:
+                    content = f.read()
+                    if content.strip():
+                        return content
+            except Exception:
+                pass
+    return ""
+
+
+# Pre-cache static assets into memory on startup
+HTML_CACHE = read_static_file("index.html")
+CSS_CACHE = read_static_file("style.css")
+JS_CACHE = read_static_file("app.js")
 
 
 @app.get("/")
 @app.get("/index.html")
+@app.get("/api")
+@app.get("/api/")
 @app.get("/api/index.py")
+@app.get("/api/index.py/")
 @app.get("/api/index")
 def serve_index():
-    if os.path.exists(INDEX_FILE):
-        return FileResponse(INDEX_FILE, media_type="text/html")
-    # Fallback to frontend/dist/index.html if built
-    dist_index = os.path.join(ROOT_DIR, "frontend", "dist", "index.html")
-    if os.path.exists(dist_index):
-        return FileResponse(dist_index, media_type="text/html")
-    return {"message": "Sudarshan Compiler Studio API", "status": "running"}
+    global HTML_CACHE
+    if not HTML_CACHE:
+        HTML_CACHE = read_static_file("index.html")
+    if HTML_CACHE:
+        return HTMLResponse(content=HTML_CACHE, status_code=200, media_type="text/html; charset=utf-8")
+    return HTMLResponse(content="<!DOCTYPE html><html><body><h1>Sudarshan Compiler Studio</h1></body></html>", status_code=200, media_type="text/html")
 
 
 @app.get("/style.css")
 @app.get("/api/style.css")
 @app.get("/api/index.py/style.css")
 def serve_css():
-    if os.path.exists(STYLE_FILE):
-        return FileResponse(STYLE_FILE, media_type="text/css")
-    return JSONResponse(status_code=404, content={"detail": "style.css not found"})
+    global CSS_CACHE
+    if not CSS_CACHE:
+        CSS_CACHE = read_static_file("style.css")
+    if CSS_CACHE:
+        return Response(content=CSS_CACHE, status_code=200, media_type="text/css; charset=utf-8")
+    return Response(content="/* Sudarshan Compiler Studio CSS */", status_code=200, media_type="text/css; charset=utf-8")
 
 
 @app.get("/app.js")
 @app.get("/api/app.js")
 @app.get("/api/index.py/app.js")
 def serve_js():
-    if os.path.exists(APP_FILE):
-        return FileResponse(APP_FILE, media_type="application/javascript")
-    return JSONResponse(status_code=404, content={"detail": "app.js not found"})
+    global JS_CACHE
+    if not JS_CACHE:
+        JS_CACHE = read_static_file("app.js")
+    if JS_CACHE:
+        return Response(content=JS_CACHE, status_code=200, media_type="application/javascript; charset=utf-8")
+    return Response(content="// Sudarshan Compiler Studio JS", status_code=200, media_type="application/javascript; charset=utf-8")
 
 
 @app.get("/api/health")
@@ -266,6 +297,21 @@ async def compile_code(request: Request):
 async def compile_run_compat(request: Request):
     """Backwards-compatibility route for compile-run."""
     return await compile_code(request)
+
+
+# Catch-all route to serve the Studio SPA for any frontend path, preventing 404s
+@app.get("/{full_path:path}")
+def catch_all(full_path: str):
+    clean = full_path.strip("/")
+    if clean.endswith("style.css"):
+        return serve_css()
+    if clean.endswith("app.js"):
+        return serve_js()
+    if clean in ("api/health", "health"):
+        return health()
+    if clean in ("api/presets", "presets"):
+        return get_presets()
+    return serve_index()
 
 
 # Entry point for Vercel
