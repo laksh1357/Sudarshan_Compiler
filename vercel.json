@@ -3,7 +3,7 @@
   "outputDirectory": "frontend/dist",
   "functions": {
     "api/index.py": {
-      "includeFiles": "src/**,backend/**,examples/**"
+      "includeFiles": "src/**,backend/**,examples/**,frontend/dist/**"
     }
   },
   "rewrites": [
@@ -13,7 +13,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "/frontend/dist/$1"
     }
   ]
 }
