@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Sparkles, ArrowRight, CheckCircle2, TrendingDown, Layers, HelpCircle } from 'lucide-react';
 import { OptimizationRecord, OptimizationStats } from '../types/compiler';
 
 interface OptimizationReportViewProps {
@@ -11,140 +10,78 @@ export const OptimizationReportView: React.FC<OptimizationReportViewProps> = ({
   report,
   stats,
 }) => {
-  const [filterCategory, setFilterCategory] = useState<string>('ALL');
+  const [copied, setCopied] = useState(false);
 
-  if (!report || report.length === 0) {
-    return (
-      <div className="h-full flex flex-col items-center justify-center text-studio-400 p-6">
-        <Sparkles className="w-8 h-8 text-studio-600 mb-2" />
-        <p className="text-sm font-medium">No Optimizations Applied</p>
-        <p className="text-xs text-studio-500 mt-1 max-w-sm text-center">
-          The optimizer analyzed the intermediate code, but no constant folding, algebraic identities, or dead-code elimination opportunities were detected.
-        </p>
-      </div>
-    );
-  }
+  // Generate observable behavior explanation text
+  const behaviorText =
+    report.length > 0
+      ? report
+          .map(
+            (r, i) =>
+              `Pass [${r.pass_name}]:\n  Original:    ${r.original}\n  Transformed: ${r.transformed}\n  Reason:      ${r.reason}`
+          )
+          .join('\n\n')
+      : 'No transformation rules triggered for this program. Instructions were already in minimal canonical form or contained runtime-dependent variable references.';
 
-  // Categories
-  const categories = Array.from(new Set(report.map((r) => r.category)));
-
-  const filteredReport = filterCategory === 'ALL'
-    ? report
-    : report.filter((r) => r.category === filterCategory);
-
-  const getCategoryBadge = (cat: string) => {
-    switch (cat) {
-      case 'constant_folding':
-        return 'bg-accent-blue/10 text-accent-blue border-accent-blue/30';
-      case 'constant_propagation':
-        return 'bg-accent-purple/10 text-accent-purple border-accent-purple/30';
-      case 'algebraic':
-        return 'bg-accent-green/10 text-accent-green border-accent-green/30';
-      case 'dead_code':
-        return 'bg-accent-red/10 text-accent-red border-accent-red/30';
-      case 'branch_simplification':
-        return 'bg-accent-yellow/10 text-accent-yellow border-accent-yellow/30';
-      default:
-        return 'bg-studio-700 text-studio-300 border-studio-600';
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(behaviorText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   return (
-    <div className="h-full flex flex-col bg-studio-900 overflow-auto p-4 gap-4">
-      {/* Top Statistics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="p-3 bg-studio-850 rounded-lg border border-studio-700">
-          <div className="flex items-center gap-2 text-studio-400 text-xs font-medium mb-1">
-            <Sparkles className="w-4 h-4 text-accent-yellow" />
-            <span>Transformations</span>
-          </div>
-          <div className="text-xl font-bold font-mono text-white">{report.length}</div>
-        </div>
-
-        <div className="p-3 bg-studio-850 rounded-lg border border-studio-700">
-          <div className="flex items-center gap-2 text-studio-400 text-xs font-medium mb-1">
-            <TrendingDown className="w-4 h-4 text-accent-green" />
-            <span>IR Instruction Reduction</span>
-          </div>
-          <div className="text-xl font-bold font-mono text-accent-green">
-            {stats ? `-${stats.reduction_percentage}%` : '0%'}
-          </div>
-        </div>
-
-        <div className="p-3 bg-studio-850 rounded-lg border border-studio-700">
-          <div className="flex items-center gap-2 text-studio-400 text-xs font-medium mb-1">
-            <Layers className="w-4 h-4 text-accent-purple" />
-            <span>Active Optimization Passes</span>
-          </div>
-          <div className="text-xl font-bold font-mono text-white">{categories.length}</div>
-        </div>
-      </div>
-
-      {/* Filter Chips */}
-      <div className="flex items-center gap-1.5 flex-wrap">
-        <button
-          onClick={() => setFilterCategory('ALL')}
-          className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
-            filterCategory === 'ALL'
-              ? 'bg-studio-700 text-white border border-studio-500'
-              : 'bg-studio-800 text-studio-400 hover:text-studio-200 border border-studio-700'
-          }`}
-        >
-          All ({report.length})
+    <div>
+      <div className="pane-subheading-bar">
+        <div className="pane-subheading">7. Expected optimized behavior</div>
+        <button onClick={handleCopy} className="btn-sm btn-ghost">
+          {copied ? 'Copied!' : 'Copy'}
         </button>
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setFilterCategory(cat)}
-            className={`px-2.5 py-1 rounded text-xs font-medium uppercase font-mono transition-colors ${
-              filterCategory === cat
-                ? 'bg-studio-700 text-white border border-studio-500'
-                : 'bg-studio-800 text-studio-400 hover:text-studio-200 border border-studio-700'
-            }`}
-          >
-            {cat.replace('_', ' ')}
-          </button>
-        ))}
       </div>
 
-      {/* Transformations List */}
-      <div className="space-y-3">
-        {filteredReport.map((rec, idx) => (
-          <div
-            key={idx}
-            className="p-3.5 bg-studio-850 rounded-lg border border-studio-700 hover:border-studio-600 transition-colors"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="font-semibold text-xs text-white flex items-center gap-2">
-                <span className="text-studio-500 font-mono text-[11px]">#{idx + 1}</span>
-                {rec.pass_name}
-              </span>
-              <span className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-semibold border ${getCategoryBadge(rec.category)}`}>
-                {rec.category.replace('_', ' ')}
-              </span>
-            </div>
+      <p className="section-desc">
+        With optimization, the Sudarshan compiler applies multi-pass IR optimizations: constant expression folding, algebraic identity simplifications (e.g., <code>x + 0 → x</code>), and dead-code elimination.
+      </p>
 
-            {/* Instruction Transformation Display */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 my-2 font-mono text-xs">
-              <div className="p-2 bg-studio-900 rounded border border-studio-750 text-studio-400">
-                <span className="text-[10px] uppercase text-studio-500 block mb-1">Before:</span>
-                <code className="text-accent-red/90">{rec.original}</code>
+      {/* Structured Transformation Cards */}
+      {report.length > 0 && (
+        <div className="space-y-2 mb-4">
+          {report.map((r, idx) => (
+            <div
+              key={idx}
+              className="p-2.5 rounded-lg border border-studio-600 bg-black/25 text-xs font-mono space-y-1"
+            >
+              <div className="flex items-center justify-between">
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
+                  {r.pass_name}
+                </span>
+                <span className="text-studio-500 text-[11px] font-sans">{r.category}</span>
               </div>
-
-              <div className="p-2 bg-studio-900 rounded border border-accent-green/20 text-accent-green">
-                <span className="text-[10px] uppercase text-studio-500 block mb-1">After:</span>
-                <code className="font-semibold">{rec.transformed}</code>
+              <div className="flex items-center gap-2 pt-1">
+                <span className="text-red-400 line-through">{r.original}</span>
+                <span className="text-studio-500">→</span>
+                <span className="text-emerald-300 font-semibold">{r.transformed}</span>
+              </div>
+              <div className="text-studio-400 font-sans text-[11px] pt-0.5">
+                {r.reason}
               </div>
             </div>
+          ))}
+        </div>
+      )}
 
-            {/* Reason */}
-            <div className="text-xs text-studio-400 flex items-start gap-1.5 mt-2">
-              <HelpCircle className="w-3.5 h-3.5 text-accent-blue shrink-0 mt-0.5" />
-              <span>{rec.reason}</span>
-            </div>
-          </div>
-        ))}
+      <p className="section-desc-bold">The important observable behavior is:</p>
+      <div className="code-box-wrapper">
+        <div className="code-box-header">
+          <span className="code-box-title">text</span>
+          <button className="copy-icon-btn" onClick={handleCopy} title="Copy text">
+            {copied ? '✓' : '📋'}
+          </button>
+        </div>
+        <pre className="code-view font-mono text-xs text-studio-300">{behaviorText}</pre>
       </div>
     </div>
   );

@@ -1,164 +1,104 @@
-import React, { useRef } from 'react';
-import Editor, { Monaco } from '@monaco-editor/react';
-import { CompilerError } from '../types/compiler';
+import React, { useRef, useEffect, useState } from 'react';
 
 interface SourceEditorProps {
   value: string;
   onChange: (value: string) => void;
-  errors: CompilerError[];
+  onClear: () => void;
 }
 
 export const SourceEditor: React.FC<SourceEditorProps> = ({
   value,
   onChange,
-  errors,
+  onClear,
 }) => {
-  const monacoRef = useRef<Monaco | null>(null);
-  const editorRef = useRef<any>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const lineNumbersRef = useRef<HTMLDivElement>(null);
+  const [copied, setCopied] = useState(false);
 
-  const handleEditorWillMount = (monaco: Monaco) => {
-    monacoRef.current = monaco;
+  // Compute line count
+  const lines = value.split('\n');
+  const lineCount = Math.max(lines.length, 1);
 
-    // Register Sudarshan language
-    if (!monaco.languages.getLanguages().some((l: any) => l.id === 'sudarshan')) {
-      monaco.languages.register({ id: 'sudarshan' });
-
-      monaco.languages.setMonarchTokensProvider('sudarshan', {
-        keywords: ['int', 'if', 'else', 'while', 'print'],
-        operators: ['=', '==', '!=', '<', '>', '<=', '>=', '+', '-', '*', '/'],
-        symbols: /[=><!~?:&|+\-*\/\^%]+/,
-
-        tokenizer: {
-          root: [
-            // Keywords
-            [
-              /[a-zA-Z_]\w*/,
-              {
-                cases: {
-                  '@keywords': 'keyword',
-                  '@default': 'identifier',
-                },
-              },
-            ],
-
-            // Whitespace & Comments
-            { include: '@whitespace' },
-
-            // Numbers
-            [/\d+/, 'number'],
-
-            // Delimiters and operators
-            [/[{}()\[\]]/, '@brackets'],
-            [
-              /@symbols/,
-              {
-                cases: {
-                  '@operators': 'operator',
-                  '@default': '',
-                },
-              },
-            ],
-            [/;/, 'delimiter'],
-          ],
-
-          whitespace: [
-            [/[ \t\r\n]+/, 'white'],
-            [/\/\/.*$/, 'comment'],
-          ],
-        },
-      });
-
-      // Define Sudarshan Dark Theme
-      monaco.editor.defineTheme('sudarshan-dark', {
-        base: 'vs-dark',
-        inherit: true,
-        rules: [
-          { token: 'keyword', foreground: 'ff7b72', fontStyle: 'bold' },
-          { token: 'identifier', foreground: 'e6edf3' },
-          { token: 'number', foreground: '79c0ff' },
-          { token: 'operator', foreground: 'd2a8ff' },
-          { token: 'comment', foreground: '8b949e', fontStyle: 'italic' },
-          { token: 'delimiter', foreground: 'c9d1d9' },
-          { token: '@brackets', foreground: 'd2a8ff' },
-        ],
-        colors: {
-          'editor.background': '#0d1117',
-          'editor.foreground': '#e6edf3',
-          'editorLineNumber.foreground': '#484f58',
-          'editorLineNumber.activeForeground': '#c9d1d9',
-          'editor.selectionBackground': '#264f78',
-          'editor.lineHighlightBackground': '#161b22',
-          'editorCursor.foreground': '#58a6ff',
-          'editorWhitespace.foreground': '#21262d',
-          'editorIndentGuide.background': '#21262d',
-          'editorIndentGuide.activeBackground': '#30363d',
-        },
-      });
+  // Sync scrolling between textarea and line numbers
+  const handleScroll = () => {
+    if (textareaRef.current && lineNumbersRef.current) {
+      lineNumbersRef.current.scrollTop = textareaRef.current.scrollTop;
     }
   };
 
-  const handleEditorDidMount = (editor: any, monaco: Monaco) => {
-    editorRef.current = editor;
-    monacoRef.current = monaco;
-    updateMarkers(editor, monaco, errors);
+  // Support Tab key to insert 4 spaces
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const newValue = value.substring(0, start) + '    ' + value.substring(end);
+      onChange(newValue);
+
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + 4;
+      }, 0);
+    }
   };
 
-  // Update error squigglies when errors change
-  React.useEffect(() => {
-    if (editorRef.current && monacoRef.current) {
-      updateMarkers(editorRef.current, monacoRef.current, errors);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch (err) {
+      console.error('Failed to copy code:', err);
     }
-  }, [errors]);
-
-  const updateMarkers = (editor: any, monaco: Monaco, errList: CompilerError[]) => {
-    const model = editor.getModel();
-    if (!model) return;
-
-    const markers = errList
-      .filter((e) => e.line !== null && e.line !== undefined && e.line > 0)
-      .map((e) => {
-        const line = e.line!;
-        const col = e.column && e.column > 0 ? e.column : 1;
-        const lineContent = model.getLineContent(line) || '';
-        return {
-          startLineNumber: line,
-          startColumn: col,
-          endLineNumber: line,
-          endColumn: Math.max(col + 1, lineContent.length + 1),
-          message: `${e.error_type}: ${e.message}`,
-          severity: monaco.MarkerSeverity.Error,
-        };
-      });
-
-    monaco.editor.setModelMarkers(model, 'sudarshan', markers);
   };
 
   return (
-    <div className="w-full h-full relative">
-      <Editor
-        height="100%"
-        language="sudarshan"
-        theme="sudarshan-dark"
-        value={value}
-        onChange={(val) => onChange(val || '')}
-        beforeMount={handleEditorWillMount}
-        onMount={handleEditorDidMount}
-        options={{
-          fontSize: 13,
-          fontFamily: "'JetBrains Mono', monospace",
-          fontLigatures: true,
-          minimap: { enabled: false },
-          scrollBeyondLastLine: false,
-          automaticLayout: true,
-          tabSize: 4,
-          lineNumbers: 'on',
-          renderLineHighlight: 'all',
-          cursorBlinking: 'smooth',
-          cursorSmoothCaretAnimation: 'on',
-          smoothScrolling: true,
-          padding: { top: 12, bottom: 12 },
-        }}
-      />
-    </div>
+    <section className="pane editor-pane">
+      <div className="pane-header">
+        <div className="pane-title">
+          <span className="pane-icon">📝</span>
+          <h2>Sudarshan Source Code</h2>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={onClear}
+            className="btn-sm btn-ghost"
+            title="Clear Editor"
+          >
+            Clear
+          </button>
+          <button
+            onClick={handleCopy}
+            className="btn-sm btn-ghost"
+            title="Copy Code"
+          >
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
+      </div>
+
+      <div className="editor-container">
+        {/* Line Numbers */}
+        <div ref={lineNumbersRef} className="line-numbers">
+          {Array.from({ length: lineCount }, (_, i) => (
+            <div key={i + 1}>{i + 1}</div>
+          ))}
+        </div>
+
+        {/* Text Area */}
+        <textarea
+          ref={textareaRef}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onScroll={handleScroll}
+          onKeyDown={handleKeyDown}
+          className="code-editor"
+          spellCheck={false}
+          placeholder={`// Type your Sudarshan code here...\n\nint a = 15;\nint b = a + 25;\nprint(b);`}
+        />
+      </div>
+    </section>
   );
 };

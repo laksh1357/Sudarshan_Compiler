@@ -32,6 +32,7 @@ export default {
         }
       },
       fontFamily: {
+        heading: ['Outfit', '-apple-system', 'sans-serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'Menlo', 'Monaco', 'Courier New', 'monospace'],
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       }

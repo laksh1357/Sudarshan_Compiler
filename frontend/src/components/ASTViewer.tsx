@@ -1,213 +1,354 @@
-import React, { useState } from 'react';
-import {
-  Network,
-  ChevronRight,
-  ChevronDown,
-  Layers,
-  FileText,
-  Copy,
-  Check,
-  Code2
-} from 'lucide-react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ASTNodeData } from '../types/compiler';
 
 interface ASTViewerProps {
   ast?: ASTNodeData | null;
   astText?: string | null;
-  astDot?: string | null;
 }
 
-// Recursive AST Node Component
-const ASTTreeNode: React.FC<{
-  node: ASTNodeData;
-  depth?: number;
-  isLast?: boolean;
-}> = ({ node, depth = 0, isLast = true }) => {
-  const [collapsed, setCollapsed] = useState(false);
-  const hasChildren = node.children && node.children.length > 0;
+interface LayoutNode {
+  id: string;
+  label: string;
+  sublabel: string;
+  category: 'root' | 'stmt' | 'expr' | 'leaf';
+  children: LayoutNode[];
+  subtreeWidth?: number;
+  x?: number;
+  y?: number;
+}
 
-  // Node type styling
-  const getNodeColor = (type: string) => {
-    switch (type) {
-      case 'Program':
-        return 'text-accent-blue bg-accent-blue/10 border-accent-blue/30';
-      case 'VarDecl':
-        return 'text-accent-green bg-accent-green/10 border-accent-green/30';
-      case 'Assignment':
-        return 'text-accent-orange bg-accent-orange/10 border-accent-orange/30';
-      case 'PrintStmt':
-        return 'text-accent-purple bg-accent-purple/10 border-accent-purple/30';
-      case 'IfStmt':
-      case 'WhileStmt':
-        return 'text-accent-yellow bg-accent-yellow/10 border-accent-yellow/30';
-      case 'Block':
-        return 'text-studio-300 bg-studio-700 border-studio-600';
-      case 'BinaryExpr':
-      case 'UnaryExpr':
-        return 'text-accent-blue bg-studio-800 border-studio-600';
-      case 'IntegerLiteral':
-        return 'text-accent-green bg-studio-850 border-studio-700';
-      case 'Variable':
-        return 'text-studio-200 bg-studio-850 border-studio-700';
-      default:
-        return 'text-studio-400 bg-studio-800 border-studio-700';
+export const ASTViewer: React.FC<ASTViewerProps> = ({ ast, astText }) => {
+  const [viewMode, setViewMode] = useState<'graph' | 'cards' | 'text'>('graph');
+  const [copied, setCopied] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Transform raw AST into simplified LayoutNode tree
+  const treeRoot = useMemo(() => {
+    if (!ast) return null;
+
+    function buildNode(data: any): LayoutNode | null {
+      if (!data) return null;
+
+      let label = data.label || data.type || 'Node';
+      let sublabel = data.line ? `Line ${data.line}` : '';
+      let category: 'root' | 'stmt' | 'expr' | 'leaf' = 'expr';
+      let rawChildren: any[] = [];
+
+      const t = data.type || '';
+
+      if (t === 'Program' || t === 'Block') {
+        label = t === 'Program' ? 'Root Program' : 'Code Block';
+        const stmtsCount = data.children ? data.children.length : (data.details?.statements_count || 0);
+        sublabel = `${stmtsCount} Stmts`;
+        category = 'root';
+        if (data.children) rawChildren = data.children;
+      } else if (t.includes('Declaration') || t === 'VarDecl' || t === 'DeclarationStmt') {
+        const varName = data.details?.name || data.label?.replace('Decl: ', '') || '';
+        const varType = data.details?.type || 'int';
+        label = `Decl: ${varType} ${varName}`;
+        category = 'stmt';
+        if (data.children) rawChildren = data.children;
+      } else if (t.includes('Assignment') || t === 'Assign' || t === 'AssignmentStmt') {
+        const varName = data.details?.name || data.label?.replace('Assign: ', '') || '';
+        label = `Assign: ${varName}`;
+        category = 'stmt';
+        if (data.children) rawChildren = data.children;
+      } else if (t.includes('Print') || t === 'PrintStmt') {
+        label = 'print()';
+        category = 'stmt';
+        if (data.children) rawChildren = data.children;
+      } else if (t.includes('While') || t === 'WhileStmt') {
+        label = 'WhileLoop';
+        category = 'stmt';
+        if (data.children) rawChildren = data.children;
+      } else if (t.includes('If') || t === 'IfStmt') {
+        label = 'IfBranch';
+        category = 'stmt';
+        if (data.children) rawChildren = data.children;
+      } else if (t.includes('Binary') || t === 'BinaryOp') {
+        const op = data.details?.operator || data.label?.replace('Op: ', '') || 'Op';
+        label = `Op: ${op}`;
+        category = 'expr';
+        if (data.children) rawChildren = data.children;
+      } else if (t.includes('Unary') || t === 'UnaryOp') {
+        const op = data.details?.operator || '-';
+        label = `Unary: ${op}`;
+        category = 'expr';
+        if (data.children) rawChildren = data.children;
+      } else if (t.includes('Literal') || t === 'Integer' || t === 'NumberLiteral' || t === 'IntegerExpr') {
+        const val = data.details?.value !== undefined ? data.details.value : data.label;
+        label = `Val: ${val}`;
+        category = 'leaf';
+      } else if (t.includes('Identifier') || t === 'Variable' || t === 'VariableExpr') {
+        const name = data.details?.name || data.label;
+        label = `Var: ${name}`;
+        category = 'leaf';
+      } else {
+        if (data.children) rawChildren = data.children;
+      }
+
+      const childNodes = rawChildren
+        .map((c) => buildNode(c))
+        .filter((c): c is LayoutNode => c !== null);
+
+      return {
+        id: data.id || Math.random().toString(),
+        label,
+        sublabel,
+        category,
+        children: childNodes,
+      };
+    }
+
+    return buildNode(ast);
+  }, [ast]);
+
+  // Compute Layout Positions (x, y)
+  const layout = useMemo(() => {
+    if (!treeRoot) return null;
+
+    const NODE_WIDTH = 135;
+    const NODE_HEIGHT = 44;
+    const LEVEL_GAP = 70;
+    const SIBLING_GAP = 24;
+
+    function calcSubtreeWidth(node: LayoutNode): number {
+      if (!node.children || node.children.length === 0) {
+        node.subtreeWidth = NODE_WIDTH + SIBLING_GAP;
+        return node.subtreeWidth;
+      }
+      let w = 0;
+      node.children.forEach((c) => {
+        w += calcSubtreeWidth(c);
+      });
+      node.subtreeWidth = Math.max(w, NODE_WIDTH + SIBLING_GAP);
+      return node.subtreeWidth;
+    }
+
+    calcSubtreeWidth(treeRoot);
+
+    let maxDepth = 0;
+    function assignCoords(node: LayoutNode, leftX: number, depth: number) {
+      maxDepth = Math.max(maxDepth, depth);
+      node.y = 45 + depth * (NODE_HEIGHT + LEVEL_GAP);
+
+      if (!node.children || node.children.length === 0) {
+        node.x = leftX + (node.subtreeWidth || NODE_WIDTH) / 2;
+      } else {
+        let curLeft = leftX;
+        node.children.forEach((c) => {
+          assignCoords(c, curLeft, depth + 1);
+          curLeft += c.subtreeWidth || NODE_WIDTH;
+        });
+        const firstChild = node.children[0];
+        const lastChild = node.children[node.children.length - 1];
+        node.x = ((firstChild.x || 0) + (lastChild.x || 0)) / 2;
+      }
+    }
+
+    assignCoords(treeRoot, 30, 0);
+
+    const totalWidth = Math.max((treeRoot.subtreeWidth || 800) + 80, 850);
+    const totalHeight = 70 + (maxDepth + 1) * (NODE_HEIGHT + LEVEL_GAP);
+
+    // Flatten nodes and edges for SVG rendering
+    const allNodes: LayoutNode[] = [];
+    const allEdges: Array<{ id: string; x1: number; y1: number; x2: number; y2: number }> = [];
+
+    function collect(node: LayoutNode) {
+      allNodes.push(node);
+      node.children.forEach((child) => {
+        allEdges.push({
+          id: `${node.id}-${child.id}`,
+          x1: node.x!,
+          y1: node.y! + NODE_HEIGHT / 2,
+          x2: child.x!,
+          y2: child.y! - NODE_HEIGHT / 2,
+        });
+        collect(child);
+      });
+    }
+
+    collect(treeRoot);
+
+    return {
+      totalWidth,
+      totalHeight,
+      nodes: allNodes,
+      edges: allEdges,
+      NODE_WIDTH,
+      NODE_HEIGHT,
+    };
+  }, [treeRoot]);
+
+  // Center the graph on initial render
+  useEffect(() => {
+    if (viewMode === 'graph' && containerRef.current && layout) {
+      const container = containerRef.current;
+      const scrollX = Math.max(0, (layout.totalWidth - container.clientWidth) / 2);
+      container.scrollLeft = scrollX;
+    }
+  }, [viewMode, layout]);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(astText || JSON.stringify(ast, null, 2));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  return (
-    <div className="font-mono text-xs select-none">
-      <div className="flex items-center gap-1.5 py-1 px-1.5 rounded hover:bg-studio-800/60 transition-colors group">
-        {/* Expand / Collapse toggle */}
-        {hasChildren ? (
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="w-4 h-4 rounded hover:bg-studio-700 flex items-center justify-center text-studio-400"
-          >
-            {collapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          </button>
-        ) : (
-          <span className="w-4 h-4 flex items-center justify-center text-studio-600 text-[10px]">•</span>
-        )}
-
-        {/* Relation badge if any (e.g. left, right, cond, then, else) */}
-        {node.relation && (
-          <span className="text-[10px] uppercase font-semibold text-studio-500 bg-studio-800/80 px-1 py-0.2 rounded border border-studio-700">
-            {node.relation}
-          </span>
-        )}
-
-        {/* Node Badge */}
-        <span className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${getNodeColor(node.type)}`}>
-          {node.label}
-        </span>
-
-        {/* Node Location */}
-        {node.line !== null && node.line !== undefined && (
-          <span className="text-[10px] text-studio-500 opacity-0 group-hover:opacity-100 transition-opacity">
-            L{node.line}:C{node.column}
-          </span>
-        )}
-      </div>
-
-      {/* Render Children */}
-      {hasChildren && !collapsed && (
-        <div className="ml-5 pl-2 border-l border-studio-750 flex flex-col gap-0.5 mt-0.5">
-          {node.children.map((child, idx) => (
-            <ASTTreeNode
-              key={child.id || idx}
-              node={child}
-              depth={depth + 1}
-              isLast={idx === node.children.length - 1}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-export const ASTViewer: React.FC<ASTViewerProps> = ({
-  ast,
-  astText,
-  astDot,
-}) => {
-  const [viewMode, setViewMode] = useState<'visual' | 'text' | 'dot'>('visual');
-  const [copied, setCopied] = useState(false);
-
-  if (!ast) {
+  if (!ast && !astText) {
     return (
-      <div className="h-full flex flex-col items-center justify-center text-studio-400 p-6">
-        <Network className="w-8 h-8 text-studio-600 mb-2" />
-        <p className="text-sm font-medium">No AST Available</p>
-        <p className="text-xs text-studio-500 mt-1">Compile source code to generate and inspect the Abstract Syntax Tree.</p>
+      <div>
+        <div className="pane-subheading-bar">
+          <div className="pane-subheading">2. Expected AST</div>
+        </div>
+        <div className="code-view text-studio-500">
+          Run compilation to inspect the Abstract Syntax Tree...
+        </div>
       </div>
     );
   }
 
-  const handleCopy = async () => {
-    const textToCopy = viewMode === 'dot' ? (astDot || '') : (astText || '');
-    try {
-      await navigator.clipboard.writeText(textToCopy);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Ignore
-    }
+  // Recursive Card Renderer for 'cards' view
+  const renderCard = (node: LayoutNode, depth: number = 0) => {
+    return (
+      <div key={node.id} style={{ marginLeft: `${depth * 20}px` }} className="mb-1.5">
+        <div className="ast-node-card">
+          <div className="ast-node-title flex items-center gap-2">
+            <span>
+              {node.category === 'root'
+                ? '📁'
+                : node.category === 'stmt'
+                ? '🔹'
+                : node.category === 'expr'
+                ? '⚡'
+                : '🔢'}
+            </span>
+            <span>{node.label}</span>
+          </div>
+          {node.sublabel && (
+            <span className="ast-node-detail font-mono">{node.sublabel}</span>
+          )}
+        </div>
+        {node.children && node.children.map((c) => renderCard(c, depth + 1))}
+      </div>
+    );
   };
 
   return (
-    <div className="h-full flex flex-col bg-studio-900">
-      {/* Controls Bar */}
-      <div className="p-3 border-b border-studio-700 flex items-center justify-between gap-2 bg-studio-850">
-        <div className="flex items-center gap-1.5 bg-studio-800 p-0.5 rounded border border-studio-700">
+    <div>
+      {/* Subheading & View Switcher */}
+      <div className="pane-subheading-bar">
+        <div className="pane-subheading">2. Expected AST</div>
+        <div className="view-toggle">
           <button
-            onClick={() => setViewMode('visual')}
-            className={`flex items-center gap-1 px-2.5 py-1 text-xs rounded font-medium transition-colors ${
-              viewMode === 'visual'
-                ? 'bg-studio-700 text-white'
-                : 'text-studio-400 hover:text-studio-200'
-            }`}
+            onClick={() => setViewMode('graph')}
+            className={`toggle-btn ${viewMode === 'graph' ? 'active' : ''}`}
           >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Interactive Tree</span>
+            🌳 Graph Tree
           </button>
-
+          <button
+            onClick={() => setViewMode('cards')}
+            className={`toggle-btn ${viewMode === 'cards' ? 'active' : ''}`}
+          >
+            📋 List View
+          </button>
           <button
             onClick={() => setViewMode('text')}
-            className={`flex items-center gap-1 px-2.5 py-1 text-xs rounded font-medium transition-colors ${
-              viewMode === 'text'
-                ? 'bg-studio-700 text-white'
-                : 'text-studio-400 hover:text-studio-200'
-            }`}
+            className={`toggle-btn ${viewMode === 'text' ? 'active' : ''}`}
           >
-            <FileText className="w-3.5 h-3.5" />
-            <span>Indented Hierarchy</span>
-          </button>
-
-          <button
-            onClick={() => setViewMode('dot')}
-            className={`flex items-center gap-1 px-2.5 py-1 text-xs rounded font-medium transition-colors ${
-              viewMode === 'dot'
-                ? 'bg-studio-700 text-white'
-                : 'text-studio-400 hover:text-studio-200'
-            }`}
-          >
-            <Code2 className="w-3.5 h-3.5" />
-            <span>Graphviz DOT</span>
+            📄 Text View
           </button>
         </div>
-
-        {viewMode !== 'visual' && (
-          <button
-            onClick={handleCopy}
-            className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-studio-400 hover:text-studio-200 bg-studio-800 hover:bg-studio-750 rounded border border-studio-700 transition-colors"
-          >
-            {copied ? <Check className="w-3 h-3 text-accent-green" /> : <Copy className="w-3 h-3" />}
-            <span>Copy</span>
-          </button>
-        )}
       </div>
 
-      {/* View Content */}
-      <div className="flex-1 overflow-auto p-4">
-        {viewMode === 'visual' && (
-          <div className="max-w-3xl">
-            <ASTTreeNode node={ast} />
+      {/* Mode 1: Interactive SVG Graph Tree */}
+      {viewMode === 'graph' && (
+        <div ref={containerRef} className="ast-graph-container">
+          {layout ? (
+            <svg
+              className="ast-svg"
+              width={layout.totalWidth}
+              height={layout.totalHeight}
+              style={{ minWidth: `${layout.totalWidth}px`, minHeight: `${layout.totalHeight}px` }}
+            >
+              {/* Edges */}
+              {layout.edges.map((edge) => {
+                const midY = (edge.y1 + edge.y2) / 2;
+                const pathData = `M ${edge.x1} ${edge.y1} C ${edge.x1} ${midY}, ${edge.x2} ${midY}, ${edge.x2} ${edge.y2}`;
+                return <path key={edge.id} d={pathData} className="tree-edge" />;
+              })}
+
+              {/* Nodes */}
+              {layout.nodes.map((node) => {
+                const left = (node.x || 0) - layout.NODE_WIDTH / 2;
+                const top = (node.y || 0) - layout.NODE_HEIGHT / 2;
+                return (
+                  <g
+                    key={node.id}
+                    className="tree-node-group"
+                    transform={`translate(${left}, ${top})`}
+                  >
+                    <rect
+                      width={layout.NODE_WIDTH}
+                      height={layout.NODE_HEIGHT}
+                      className={`tree-node-rect ${node.category}`}
+                    />
+                    <text
+                      x={layout.NODE_WIDTH / 2}
+                      y={node.sublabel ? layout.NODE_HEIGHT / 2 - 3 : layout.NODE_HEIGHT / 2 + 4}
+                      className="tree-node-text"
+                    >
+                      {node.label}
+                    </text>
+                    {node.sublabel && (
+                      <text
+                        x={layout.NODE_WIDTH / 2}
+                        y={layout.NODE_HEIGHT / 2 + 11}
+                        className="tree-node-subtext"
+                      >
+                        {node.sublabel}
+                      </text>
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
+          ) : (
+            <div className="p-8 text-center text-studio-500">Could not calculate AST layout.</div>
+          )}
+        </div>
+      )}
+
+      {/* Mode 2: Card List View */}
+      {viewMode === 'cards' && (
+        <div className="ast-visualizer overflow-auto max-h-[calc(100vh-210px)] pr-2">
+          {treeRoot ? (
+            <div className="ast-tree">{renderCard(treeRoot, 0)}</div>
+          ) : (
+            <div className="text-studio-500">No AST cards available.</div>
+          )}
+        </div>
+      )}
+
+      {/* Mode 3: Text View */}
+      {viewMode === 'text' && (
+        <div className="code-box-wrapper">
+          <div className="code-box-header">
+            <span className="code-box-title">text</span>
+            <button className="copy-icon-btn" onClick={handleCopy} title="Copy text">
+              {copied ? '✓' : '📋'}
+            </button>
           </div>
-        )}
-
-        {viewMode === 'text' && (
-          <pre className="font-mono text-xs text-studio-300 leading-relaxed whitespace-pre-wrap select-text">
-            {astText || 'No text tree available'}
+          <pre className="code-view font-mono text-xs text-studio-300">
+            {astText || JSON.stringify(ast, null, 2)}
           </pre>
-        )}
-
-        {viewMode === 'dot' && (
-          <pre className="font-mono text-xs text-accent-blue/90 leading-relaxed whitespace-pre-wrap select-text">
-            {astDot || 'No DOT graph syntax available'}
-          </pre>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
