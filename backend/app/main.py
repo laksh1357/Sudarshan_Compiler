@@ -57,6 +57,20 @@ app.include_router(health.router)
 app.include_router(examples.router)
 app.include_router(compilation.router)
 
+# Also mount without /api prefix for serverless environments where /api is stripped by the gateway
+app.include_router(health.router, prefix="")
+app.include_router(examples.router, prefix="")
+app.include_router(compilation.router, prefix="")
+
+@app.get("/debug-path")
+@app.get("/api/debug-path")
+def debug_path(request: Request):
+    return {
+        "url_path": request.url.path,
+        "scope_path": request.scope.get("path", ""),
+        "headers": dict(request.headers)
+    }
+
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
