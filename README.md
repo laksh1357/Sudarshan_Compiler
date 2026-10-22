@@ -198,41 +198,30 @@ Sudarshan_Compiler/
 ## 7. How to Run Locally
 
 ### Prerequisites
-- Python 3.10 or higher
-- Node.js 18+ and npm
+- Python 3.10 or higher (Zero Node.js dependency required)
 
 ### Quick Start: Launch Studio with One Command
 ```bash
-# 1. Create Python virtual environment and install backend packages
+# 1. Create Python virtual environment and install packages
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# 2. Install frontend packages
-cd frontend && npm install && cd ..
-
-# 3. Launch both Backend and Frontend together
+# 2. Launch Compiler Studio
 ./start_studio.sh
 ```
-Open **[http://localhost:5173](http://localhost:5173)** in your browser to access Sudarshan Compiler Studio.
+Open **[http://localhost:8000](http://localhost:8000)** in your browser to access Sudarshan Compiler Studio.
 
 ---
 
 ### Running Manually
 
-#### Terminal 1 — Start Backend:
 ```bash
 source .venv/bin/activate
-uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
+uvicorn api.index:app --host 127.0.0.1 --port 8000 --reload
 ```
-API Docs available at: `http://127.0.0.1:8000/docs`
-
-#### Terminal 2 — Start Frontend:
-```bash
-cd frontend
-npm run dev
-```
-Frontend available at: `http://localhost:5173`
+- Studio Playground: `http://127.0.0.1:8000`
+- API Documentation: `http://127.0.0.1:8000/docs`
 
 ---
 

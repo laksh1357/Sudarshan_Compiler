@@ -10,21 +10,13 @@ __pycache__/
 .coverage
 htmlcov/
 
-# Environment and OS files
+# Virtual environments & OS metadata
 .venv/
 env/
 venv/
 ENV/
 .DS_Store
-FCFS/
-untitled folder/
-
-# Frontend Node and Build Artifacts
-frontend/node_modules/
-frontend/dist/
-frontend/.env.local
 *.local
-
 
 # Generated AST visualizations & output directory
 output/
@@ -33,6 +25,6 @@ build/
 *.png
 *.dot
 
-
+# Vercel deployment artifacts
 .vercel
 .env*

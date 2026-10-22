@@ -62,12 +62,10 @@ def load_example(filename: str) -> str:
 
 
 def read_static_file(filename: str) -> str:
-    """Helper to locate and read static files across local, dist, and Vercel lambda paths."""
+    """Helper to locate and read static files across local and Vercel serverless lambda paths."""
     candidates = [
         os.path.join(ROOT_DIR, filename),
         os.path.join(os.path.dirname(os.path.abspath(__file__)), filename),
-        os.path.join(ROOT_DIR, "frontend", "dist", filename),
-        os.path.join(ROOT_DIR, "frontend", filename),
         os.path.join(os.getcwd(), filename),
         filename
     ]

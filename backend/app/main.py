@@ -63,23 +63,18 @@ app.include_router(compilation.router, prefix="")
 
 
 from fastapi.responses import JSONResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
 
-DIST_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../frontend/dist"))
-INDEX_HTML = os.path.join(DIST_DIR, "index.html")
-
-# Mount frontend assets if compiled on disk
-if os.path.exists(DIST_DIR):
-    assets_dir = os.path.join(DIST_DIR, "assets")
-    if os.path.exists(assets_dir):
-        app.mount("/assets", StaticFiles(directory=assets_dir), name="static_assets")
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+INDEX_HTML = os.path.join(ROOT_DIR, "index.html")
+STYLE_CSS = os.path.join(ROOT_DIR, "style.css")
+APP_JS = os.path.join(ROOT_DIR, "app.js")
 
 
 @app.get("/api", tags=["Root"])
 def api_root():
     return {
         "message": "Welcome to Sudarshan Compiler Studio API",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "docs": "/docs",
         "endpoints": {
             "health": "/api/health",
@@ -89,6 +84,20 @@ def api_root():
             "run": "POST /api/run"
         }
     }
+
+
+@app.get("/style.css", include_in_schema=False)
+def serve_style():
+    if os.path.exists(STYLE_CSS):
+        return FileResponse(STYLE_CSS, media_type="text/css")
+    return JSONResponse(status_code=404, content={"detail": "style.css not found"})
+
+
+@app.get("/app.js", include_in_schema=False)
+def serve_app_js():
+    if os.path.exists(APP_JS):
+        return FileResponse(APP_JS, media_type="application/javascript")
+    return JSONResponse(status_code=404, content={"detail": "app.js not found"})
 
 
 @app.get("/index.html", include_in_schema=False)
