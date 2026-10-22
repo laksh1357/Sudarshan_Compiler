@@ -24,6 +24,14 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from backend.app.compiler_service import compile_sudarshan
 from backend.app.multi_lang_service import execute_multi_lang, LANGUAGE_CONFIGS
+from backend.app.routes import auth_routes, snippets_routes, admin_routes, db_health_routes
+from backend.app.db import init_db, get_db_health
+
+# Initialize database tables and seed default users
+try:
+    init_db()
+except Exception as _e:
+    pass
 
 app = FastAPI(
     title="Sudarshan Compiler Studio",
@@ -76,6 +84,18 @@ class VercelPathNormalizer(BaseHTTPMiddleware):
         return await call_next(request)
 
 app.add_middleware(VercelPathNormalizer)
+
+# Register Database, Authentication, and Authorization Routers
+app.include_router(auth_routes.router, prefix="/api")
+app.include_router(snippets_routes.router, prefix="/api")
+app.include_router(admin_routes.router, prefix="/api")
+app.include_router(db_health_routes.router, prefix="/api")
+
+# Rewritten prefix aliases for Vercel lambda execution
+app.include_router(auth_routes.router, prefix="/api/index.py/api")
+app.include_router(snippets_routes.router, prefix="/api/index.py/api")
+app.include_router(admin_routes.router, prefix="/api/index.py/api")
+app.include_router(db_health_routes.router, prefix="/api/index.py/api")
 
 
 def load_example(filename: str) -> str:
@@ -160,6 +180,7 @@ def health():
         "name": "Sudarshan Compiler Studio",
         "version": "2.0.0",
         "compiler": "Sudarshan Language Engine (100% Python)",
+        "database": get_db_health(),
         "supported_phases": [
             "Lexical Analysis",
             "Syntax Analysis",

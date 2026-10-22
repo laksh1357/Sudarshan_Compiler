@@ -832,4 +832,514 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!text) return "";
         return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
+
+    // =========================================================================
+    // DATABASE, AUTHENTICATION & RBAC LOGIC (CHECKS 5, 6, 7)
+    // =========================================================================
+    let currentUser = null;
+    let authToken = localStorage.getItem("sudarshan_token") || null;
+
+    const authBtn = document.getElementById("auth-btn");
+    const userMenu = document.getElementById("user-menu");
+    const navUsername = document.getElementById("nav-username");
+    const navRoleBadge = document.getElementById("nav-role-badge");
+    const logoutBtn = document.getElementById("logout-btn");
+    const saveSnippetBtn = document.getElementById("save-snippet-btn");
+    const mySnippetsBtn = document.getElementById("my-snippets-btn");
+    const adminPanelBtn = document.getElementById("admin-panel-btn");
+
+    const authModal = document.getElementById("auth-modal");
+    const authModalClose = document.getElementById("auth-modal-close");
+    const tabLoginBtn = document.getElementById("tab-login-btn");
+    const tabRegisterBtn = document.getElementById("tab-register-btn");
+    const loginForm = document.getElementById("login-form");
+    const registerForm = document.getElementById("register-form");
+    const loginError = document.getElementById("login-error");
+    const registerError = document.getElementById("register-error");
+    const demoDevBtn = document.getElementById("demo-dev-btn");
+    const demoAdminBtn = document.getElementById("demo-admin-btn");
+
+    const saveSnippetModal = document.getElementById("save-snippet-modal");
+    const saveSnippetClose = document.getElementById("save-snippet-close");
+    const saveSnippetCancel = document.getElementById("save-snippet-cancel");
+    const saveSnippetForm = document.getElementById("save-snippet-form");
+    const snippetTitleInput = document.getElementById("snippet-title-input");
+    const snippetDescInput = document.getElementById("snippet-desc-input");
+    const snippetLangDisplay = document.getElementById("snippet-lang-display");
+    const snippetPublicCheck = document.getElementById("snippet-public-check");
+    const saveSnippetError = document.getElementById("save-snippet-error");
+
+    const snippetsModal = document.getElementById("snippets-modal");
+    const snippetsModalClose = document.getElementById("snippets-modal-close");
+    const tabMySnippetsBtn = document.getElementById("tab-my-snippets-btn");
+    const tabPublicSnippetsBtn = document.getElementById("tab-public-snippets-btn");
+    const snippetsLoading = document.getElementById("snippets-loading");
+    const snippetsListContainer = document.getElementById("snippets-list-container");
+
+    const adminModal = document.getElementById("admin-modal");
+    const adminModalClose = document.getElementById("admin-modal-close");
+    const tabAdminUsersBtn = document.getElementById("tab-admin-users-btn");
+    const tabAdminSnippetsBtn = document.getElementById("tab-admin-snippets-btn");
+    const adminContentUsers = document.getElementById("admin-content-users");
+    const adminContentSnippets = document.getElementById("admin-content-snippets");
+    const adminUsersTbody = document.getElementById("admin-users-tbody");
+    const adminSnippetsTbody = document.getElementById("admin-snippets-tbody");
+
+    function updateAuthUI() {
+        if (currentUser && authToken) {
+            if (authBtn) authBtn.classList.add("hidden");
+            if (userMenu) userMenu.classList.remove("hidden");
+            if (navUsername) navUsername.textContent = currentUser.username;
+            if (navRoleBadge) {
+                navRoleBadge.textContent = currentUser.role;
+                if (currentUser.role === "admin") {
+                    navRoleBadge.className = "role-badge admin";
+                    if (adminPanelBtn) adminPanelBtn.classList.remove("hidden");
+                } else {
+                    navRoleBadge.className = "role-badge";
+                    if (adminPanelBtn) adminPanelBtn.classList.add("hidden");
+                }
+            }
+        } else {
+            if (authBtn) authBtn.classList.remove("hidden");
+            if (userMenu) userMenu.classList.add("hidden");
+            if (adminPanelBtn) adminPanelBtn.classList.add("hidden");
+        }
+    }
+
+    async function checkAuthStatus() {
+        if (!authToken) {
+            updateAuthUI();
+            return;
+        }
+        try {
+            const res = await fetch("/api/auth/me", {
+                headers: { "Authorization": `Bearer ${authToken}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                currentUser = data.user;
+            } else {
+                currentUser = null;
+                authToken = null;
+                localStorage.removeItem("sudarshan_token");
+            }
+        } catch (e) {
+            console.error("Auth check failed:", e);
+        }
+        updateAuthUI();
+    }
+
+    checkAuthStatus();
+
+    // Open / Close Auth Modal
+    if (authBtn) {
+        authBtn.addEventListener("click", () => {
+            if (authModal) authModal.classList.remove("hidden");
+        });
+    }
+    if (authModalClose) {
+        authModalClose.addEventListener("click", () => {
+            if (authModal) authModal.classList.add("hidden");
+        });
+    }
+
+    // Modal Tabs
+    if (tabLoginBtn && tabRegisterBtn) {
+        tabLoginBtn.addEventListener("click", () => {
+            tabLoginBtn.classList.add("active");
+            tabRegisterBtn.classList.remove("active");
+            if (loginForm) loginForm.classList.remove("hidden");
+            if (registerForm) registerForm.classList.add("hidden");
+        });
+        tabRegisterBtn.addEventListener("click", () => {
+            tabRegisterBtn.classList.add("active");
+            tabLoginBtn.classList.remove("active");
+            if (registerForm) registerForm.classList.remove("hidden");
+            if (loginForm) loginForm.classList.add("hidden");
+        });
+    }
+
+    // Quick demo buttons
+    if (demoDevBtn) {
+        demoDevBtn.addEventListener("click", () => {
+            const u = document.getElementById("login-username");
+            const p = document.getElementById("login-password");
+            if (u) u.value = "developer";
+            if (p) p.value = "Dev@123";
+        });
+    }
+    if (demoAdminBtn) {
+        demoAdminBtn.addEventListener("click", () => {
+            const u = document.getElementById("login-username");
+            const p = document.getElementById("login-password");
+            if (u) u.value = "admin";
+            if (p) p.value = "Admin@123";
+        });
+    }
+
+    // Login Form Submit
+    if (loginForm) {
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const usernameInput = document.getElementById("login-username");
+            const passwordInput = document.getElementById("login-password");
+            if (!usernameInput || !passwordInput) return;
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            if (loginError) loginError.classList.add("hidden");
+
+            try {
+                const res = await fetch("/api/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    localStorage.setItem("sudarshan_token", authToken);
+                    updateAuthUI();
+                    if (authModal) authModal.classList.add("hidden");
+                } else {
+                    if (loginError) {
+                        loginError.textContent = data.detail || "Authentication failed.";
+                        loginError.classList.remove("hidden");
+                    }
+                }
+            } catch (err) {
+                if (loginError) {
+                    loginError.textContent = "Network error during login: " + err.message;
+                    loginError.classList.remove("hidden");
+                }
+            }
+        });
+    }
+
+    // Register Form Submit
+    if (registerForm) {
+        registerForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const usernameInput = document.getElementById("reg-username");
+            const emailInput = document.getElementById("reg-email");
+            const passwordInput = document.getElementById("reg-password");
+            if (!usernameInput || !emailInput || !passwordInput) return;
+            const username = usernameInput.value.trim();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            if (registerError) registerError.classList.add("hidden");
+
+            try {
+                const res = await fetch("/api/auth/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, email, password })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    localStorage.setItem("sudarshan_token", authToken);
+                    updateAuthUI();
+                    if (authModal) authModal.classList.add("hidden");
+                } else {
+                    if (registerError) {
+                        registerError.textContent = data.detail || "Registration failed.";
+                        registerError.classList.remove("hidden");
+                    }
+                }
+            } catch (err) {
+                if (registerError) {
+                    registerError.textContent = "Network error during signup: " + err.message;
+                    registerError.classList.remove("hidden");
+                }
+            }
+        });
+    }
+
+    // Logout
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+            currentUser = null;
+            authToken = null;
+            localStorage.removeItem("sudarshan_token");
+            updateAuthUI();
+        });
+    }
+
+    // Save Snippet Modal
+    if (saveSnippetBtn) {
+        saveSnippetBtn.addEventListener("click", () => {
+            if (!currentUser) {
+                if (authModal) authModal.classList.remove("hidden");
+                return;
+            }
+            if (snippetLangDisplay) snippetLangDisplay.value = currentLanguage.toUpperCase();
+            if (snippetTitleInput) snippetTitleInput.value = "";
+            if (snippetDescInput) snippetDescInput.value = "";
+            if (saveSnippetError) saveSnippetError.classList.add("hidden");
+            if (saveSnippetModal) saveSnippetModal.classList.remove("hidden");
+        });
+    }
+    if (saveSnippetClose) saveSnippetClose.addEventListener("click", () => saveSnippetModal.classList.add("hidden"));
+    if (saveSnippetCancel) saveSnippetCancel.addEventListener("click", () => saveSnippetModal.classList.add("hidden"));
+
+    if (saveSnippetForm) {
+        saveSnippetForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (!snippetTitleInput) return;
+            const title = snippetTitleInput.value.trim();
+            const description = snippetDescInput ? snippetDescInput.value.trim() : "";
+            const is_public = snippetPublicCheck ? snippetPublicCheck.checked : false;
+            const code = editor.value;
+
+            try {
+                const res = await fetch("/api/snippets", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        title,
+                        description,
+                        language: currentLanguage,
+                        code,
+                        is_public
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    saveSnippetModal.classList.add("hidden");
+                    alert("Snippet saved successfully to database!");
+                } else {
+                    if (saveSnippetError) {
+                        saveSnippetError.textContent = data.detail || "Failed to save snippet.";
+                        saveSnippetError.classList.remove("hidden");
+                    }
+                }
+            } catch (err) {
+                if (saveSnippetError) {
+                    saveSnippetError.textContent = "Network error: " + err.message;
+                    saveSnippetError.classList.remove("hidden");
+                }
+            }
+        });
+    }
+
+    // Snippets Library Modal
+    let activeSnippetsTab = "my";
+    async function loadSnippetsList() {
+        if (snippetsLoading) snippetsLoading.classList.remove("hidden");
+        if (snippetsListContainer) snippetsListContainer.innerHTML = "";
+
+        const url = activeSnippetsTab === "my" ? "/api/snippets" : "/api/snippets/public";
+        const headers = authToken ? { "Authorization": `Bearer ${authToken}` } : {};
+
+        try {
+            const res = await fetch(url, { headers });
+            const data = await res.json();
+            if (snippetsLoading) snippetsLoading.classList.add("hidden");
+
+            if (res.ok && data.snippets) {
+                if (data.snippets.length === 0) {
+                    snippetsListContainer.innerHTML = `<div style="text-align:center; padding:1.5rem; color:var(--text-dim);">No saved snippets found. Click "Save" in the navbar to save your first code snippet.</div>`;
+                    return;
+                }
+
+                snippetsListContainer.innerHTML = data.snippets.map(s => `
+                    <div class="snippet-card">
+                        <div class="snippet-info">
+                            <div class="snippet-title">${escapeHtml(s.title)}</div>
+                            <div class="snippet-meta">
+                                <span class="role-badge">${escapeHtml(s.language)}</span>
+                                <span>${s.author ? 'by ' + escapeHtml(s.author) : (s.is_public ? '🌐 Public' : '🔒 Private')}</span>
+                                <span>${new Date(s.updated_at).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        <div class="snippet-actions">
+                            <button class="btn btn-sm btn-primary load-snippet-btn" data-id="${s.id}" data-lang="${escapeHtml(s.language)}">Load</button>
+                            ${activeSnippetsTab === "my" || (currentUser && currentUser.role === "admin") ? `
+                                <button class="btn btn-sm btn-ghost del-snippet-btn" data-id="${s.id}" style="color:var(--danger);">Delete</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join("");
+
+                // Bind Load buttons
+                snippetsListContainer.querySelectorAll(".load-snippet-btn").forEach(btn => {
+                    btn.addEventListener("click", async () => {
+                        const id = btn.getAttribute("data-id");
+                        const lang = btn.getAttribute("data-lang");
+                        try {
+                            const getRes = await fetch(`/api/snippets/${id}`, { headers });
+                            const getData = await getRes.json();
+                            if (getRes.ok && getData.snippet) {
+                                if (languageSelect && lang) {
+                                    languageSelect.value = lang.toLowerCase();
+                                    switchLanguage(lang.toLowerCase());
+                                }
+                                editor.value = getData.snippet.code;
+                                updateLineNumbers();
+                                snippetsModal.classList.add("hidden");
+                            }
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    });
+                });
+
+                // Bind Delete buttons
+                snippetsListContainer.querySelectorAll(".del-snippet-btn").forEach(btn => {
+                    btn.addEventListener("click", async () => {
+                        const id = btn.getAttribute("data-id");
+                        if (!confirm("Are you sure you want to delete this snippet?")) return;
+                        try {
+                            const delRes = await fetch(`/api/snippets/${id}`, {
+                                method: "DELETE",
+                                headers: { "Authorization": `Bearer ${authToken}` }
+                            });
+                            if (delRes.ok) {
+                                loadSnippetsList();
+                            }
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    });
+                });
+            } else {
+                snippetsListContainer.innerHTML = `<div style="color:var(--danger); padding:1rem;">Failed to load snippets: ${data.detail || "Authentication required."}</div>`;
+            }
+        } catch (err) {
+            if (snippetsLoading) snippetsLoading.classList.add("hidden");
+            snippetsListContainer.innerHTML = `<div style="color:var(--danger); padding:1rem;">Network error: ${err.message}</div>`;
+        }
+    }
+
+    if (mySnippetsBtn) {
+        mySnippetsBtn.addEventListener("click", () => {
+            activeSnippetsTab = currentUser ? "my" : "public";
+            if (tabMySnippetsBtn) {
+                if (activeSnippetsTab === "my") {
+                    tabMySnippetsBtn.classList.add("active");
+                    if (tabPublicSnippetsBtn) tabPublicSnippetsBtn.classList.remove("active");
+                } else {
+                    tabMySnippetsBtn.classList.remove("active");
+                    if (tabPublicSnippetsBtn) tabPublicSnippetsBtn.classList.add("active");
+                }
+            }
+            if (snippetsModal) snippetsModal.classList.remove("hidden");
+            loadSnippetsList();
+        });
+    }
+    if (snippetsModalClose) snippetsModalClose.addEventListener("click", () => snippetsModal.classList.add("hidden"));
+
+    if (tabMySnippetsBtn) {
+        tabMySnippetsBtn.addEventListener("click", () => {
+            activeSnippetsTab = "my";
+            tabMySnippetsBtn.classList.add("active");
+            tabPublicSnippetsBtn.classList.remove("active");
+            loadSnippetsList();
+        });
+    }
+    if (tabPublicSnippetsBtn) {
+        tabPublicSnippetsBtn.addEventListener("click", () => {
+            activeSnippetsTab = "public";
+            tabPublicSnippetsBtn.classList.add("active");
+            tabMySnippetsBtn.classList.remove("active");
+            loadSnippetsList();
+        });
+    }
+
+    // Admin Panel Modal & RBAC
+    async function loadAdminData() {
+        if (!currentUser || currentUser.role !== "admin" || !authToken) return;
+        const headers = { "Authorization": `Bearer ${authToken}` };
+
+        try {
+            const statsRes = await fetch("/api/admin/stats", { headers });
+            if (statsRes.ok) {
+                const sData = await statsRes.json();
+                const uVal = document.getElementById("stat-users-val");
+                const sVal = document.getElementById("stat-snippets-val");
+                const dbStatus = document.getElementById("stat-db-status");
+                const dbDialect = document.getElementById("stat-db-dialect");
+                if (uVal && sData.database && sData.database.tables) uVal.textContent = sData.database.tables.users;
+                if (sVal && sData.database && sData.database.tables) sVal.textContent = sData.database.tables.snippets;
+                if (dbStatus && sData.database) dbStatus.textContent = sData.database.status === "connected" ? "Online" : "Error";
+                if (dbDialect && sData.database) dbDialect.textContent = sData.database.dialect;
+            }
+
+            const usersRes = await fetch("/api/admin/users", { headers });
+            if (usersRes.ok) {
+                const uData = await usersRes.json();
+                if (adminUsersTbody) {
+                    adminUsersTbody.innerHTML = uData.users.map(u => `
+                        <tr>
+                            <td>#${u.id}</td>
+                            <td style="font-weight:600; color:var(--text-main);">${escapeHtml(u.username)}</td>
+                            <td>${escapeHtml(u.email)}</td>
+                            <td><span class="role-badge ${u.role === 'admin' ? 'admin' : ''}">${escapeHtml(u.role)}</span></td>
+                            <td>${new Date(u.created_at).toLocaleDateString()}</td>
+                        </tr>
+                    `).join("");
+                }
+            }
+
+            const snipRes = await fetch("/api/admin/snippets", { headers });
+            if (snipRes.ok) {
+                const snipData = await snipRes.json();
+                if (adminSnippetsTbody) {
+                    adminSnippetsTbody.innerHTML = snipData.snippets.map(s => `
+                        <tr>
+                            <td>#${s.id}</td>
+                            <td style="font-weight:600; color:var(--text-main);">${escapeHtml(s.title)}</td>
+                            <td>${escapeHtml(s.author)}</td>
+                            <td><span class="role-badge">${escapeHtml(s.language)}</span></td>
+                            <td>${s.is_public ? '🌐 Public' : '🔒 Private'}</td>
+                            <td><button class="btn btn-sm btn-ghost admin-del-btn" data-id="${s.id}" style="color:var(--danger);">Delete</button></td>
+                        </tr>
+                    `).join("");
+
+                    adminSnippetsTbody.querySelectorAll(".admin-del-btn").forEach(btn => {
+                        btn.addEventListener("click", async () => {
+                            const id = btn.getAttribute("data-id");
+                            if (!confirm(`Administrator action: Delete snippet #${id}?`)) return;
+                            await fetch(`/api/admin/snippets/${id}`, {
+                                method: "DELETE",
+                                headers
+                            });
+                            loadAdminData();
+                        });
+                    });
+                }
+            }
+        } catch (e) {
+            console.error("Admin data load error:", e);
+        }
+    }
+
+    if (adminPanelBtn) {
+        adminPanelBtn.addEventListener("click", () => {
+            if (adminModal) adminModal.classList.remove("hidden");
+            loadAdminData();
+        });
+    }
+    if (adminModalClose) adminModalClose.addEventListener("click", () => adminModal.classList.add("hidden"));
+
+    if (tabAdminUsersBtn && tabAdminSnippetsBtn) {
+        tabAdminUsersBtn.addEventListener("click", () => {
+            tabAdminUsersBtn.classList.add("active");
+            tabAdminSnippetsBtn.classList.remove("active");
+            if (adminContentUsers) adminContentUsers.classList.remove("hidden");
+            if (adminContentSnippets) adminContentSnippets.classList.add("hidden");
+        });
+        tabAdminSnippetsBtn.addEventListener("click", () => {
+            tabAdminSnippetsBtn.classList.add("active");
+            tabAdminUsersBtn.classList.remove("active");
+            if (adminContentSnippets) adminContentSnippets.classList.remove("hidden");
+            if (adminContentUsers) adminContentUsers.classList.add("hidden");
+        });
+    }
 });

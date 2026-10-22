@@ -1007,6 +1007,357 @@ input:checked + .slider:before {
     }
 }
 
+/* ==========================================================================
+   AUTHENTICATION, RBAC & DATABASE SNIPPETS MODAL SYSTEM
+   ========================================================================== */
+.auth-group {
+    display: flex;
+    align-items: center;
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.user-menu.hidden,
+.modal-overlay.hidden,
+.hidden {
+    display: none !important;
+}
+
+.role-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    background: rgba(99, 102, 241, 0.25);
+    color: #a5b4fc;
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    letter-spacing: 0.5px;
+}
+
+.role-badge.admin {
+    background: rgba(245, 158, 11, 0.25);
+    color: #fcd34d;
+    border-color: rgba(245, 158, 11, 0.5);
+}
+
+.admin-btn {
+    border-color: rgba(245, 158, 11, 0.4) !important;
+    color: #fcd34d !important;
+}
+
+.admin-btn:hover {
+    background: rgba(245, 158, 11, 0.15) !important;
+}
+
+.logout-btn {
+    color: var(--text-dim) !important;
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.logout-btn:hover {
+    color: var(--danger) !important;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Modal System */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(5, 8, 15, 0.75);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modal-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    width: 100%;
+    max-width: 520px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-card.modal-lg {
+    max-width: 760px;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: scale(0.96) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.modal-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.25rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: color 0.15s;
+}
+
+.modal-close:hover {
+    color: var(--text-main);
+}
+
+.modal-body {
+    padding: 1.25rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.modal-footer {
+    padding: 0.85rem 1.25rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Forms */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.form-input, .form-textarea, .form-select {
+    background: var(--bg-editor);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 0.55rem 0.75rem;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--border-glow);
+}
+
+/* Modal Tabs */
+.modal-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin: -0.25rem 0 0.5rem;
+    gap: 0.5rem;
+}
+
+.modal-tab-btn {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.modal-tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+/* Demo account quick login pills */
+.demo-accounts {
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 0.78rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.demo-pills {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.demo-pill-btn {
+    background: rgba(99, 102, 241, 0.18);
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    color: #c7d2fe;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.demo-pill-btn:hover {
+    background: rgba(99, 102, 241, 0.3);
+}
+
+/* Snippet cards */
+.snippets-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.snippet-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.snippet-card:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.snippet-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.snippet-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.snippet-meta {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.snippet-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+}
+
+/* Admin Dashboard Table */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.admin-table th, .admin-table td {
+    padding: 0.5rem 0.65rem;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+}
+
+.admin-table th {
+    color: var(--text-main);
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+}
+
+.stat-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.65rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.stat-val {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+    font-family: var(--font-heading);
+}
+
+.stat-lbl {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 </style>
 </head>
 <body>
@@ -1077,6 +1428,30 @@ input:checked + .slider:before {
                 <button id="run-btn" class="btn btn-primary" aria-label="Compile and run code">
                     <span class="btn-icon">▶</span> Compile &amp; Run
                 </button>
+                <div class="auth-group" id="auth-group">
+                    <button id="auth-btn" class="btn btn-secondary btn-sm" aria-label="Sign in or create account">
+                        <span class="btn-icon">👤</span> Sign In
+                    </button>
+                    <div id="user-menu" class="user-menu hidden">
+                        <button id="user-profile-btn" class="btn btn-secondary btn-sm" aria-label="User profile">
+                            <span class="btn-icon">👤</span>
+                            <span id="nav-username">User</span>
+                            <span id="nav-role-badge" class="role-badge">user</span>
+                        </button>
+                        <button id="save-snippet-btn" class="btn btn-secondary btn-sm" title="Save code to database" aria-label="Save snippet">
+                            <span class="btn-icon">💾</span> Save
+                        </button>
+                        <button id="my-snippets-btn" class="btn btn-secondary btn-sm" title="View saved snippets" aria-label="My snippets">
+                            <span class="btn-icon">📁</span> Snippets
+                        </button>
+                        <button id="admin-panel-btn" class="btn btn-secondary btn-sm admin-btn hidden" title="Admin dashboard" aria-label="Admin panel">
+                            <span class="btn-icon">👑</span> Admin
+                        </button>
+                        <button id="logout-btn" class="btn btn-ghost btn-sm logout-btn" title="Sign out" aria-label="Sign out">
+                            ✕
+                        </button>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -1292,6 +1667,184 @@ input:checked + .slider:before {
                 </div>
             </section>
         </main>
+
+        <!-- Modal 1: Authentication (Login & Registration) -->
+        <div id="auth-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="auth-modal-title"><span>👤</span> Account Authentication</h3>
+                    <button class="modal-close" id="auth-modal-close" aria-label="Close dialog">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-tabs" role="tablist">
+                        <button class="modal-tab-btn active" id="tab-login-btn" type="button">Sign In</button>
+                        <button class="modal-tab-btn" id="tab-register-btn" type="button">Create Account</button>
+                    </div>
+
+                    <!-- Sign In Panel -->
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label class="form-label" for="login-username">Username or Email</label>
+                            <input class="form-input" id="login-username" type="text" required placeholder="developer or admin" autocomplete="username">
+                        </div>
+                        <div class="form-group" style="margin-top:0.75rem;">
+                            <label class="form-label" for="login-password">Password</label>
+                            <input class="form-input" id="login-password" type="password" required placeholder="••••••••" autocomplete="current-password">
+                        </div>
+                        <div id="login-error" class="error-banner hidden" style="margin-top:0.75rem; border-radius:6px;"></div>
+                        <div class="demo-accounts" style="margin-top:1rem;">
+                            <span>⚡ Quick Demo Credentials (Click to pre-fill):</span>
+                            <div class="demo-pills">
+                                <button type="button" class="demo-pill-btn" id="demo-dev-btn">👤 Developer: developer / Dev@123</button>
+                                <button type="button" class="demo-pill-btn" id="demo-admin-btn">👑 Admin: admin / Admin@123</button>
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="margin-top:1rem; padding-right:0; padding-bottom:0;">
+                            <button type="submit" class="btn btn-primary" id="login-submit-btn">Sign In</button>
+                        </div>
+                    </form>
+
+                    <!-- Register Panel -->
+                    <form id="register-form" class="hidden">
+                        <div class="form-group">
+                            <label class="form-label" for="reg-username">Username</label>
+                            <input class="form-input" id="reg-username" type="text" required minlength="3" placeholder="e.g. codemaster" autocomplete="username">
+                        </div>
+                        <div class="form-group" style="margin-top:0.75rem;">
+                            <label class="form-label" for="reg-email">Email Address</label>
+                            <input class="form-input" id="reg-email" type="email" required placeholder="name@example.com" autocomplete="email">
+                        </div>
+                        <div class="form-group" style="margin-top:0.75rem;">
+                            <label class="form-label" for="reg-password">Password</label>
+                            <input class="form-input" id="reg-password" type="password" required minlength="6" placeholder="At least 6 characters" autocomplete="new-password">
+                        </div>
+                        <div id="register-error" class="error-banner hidden" style="margin-top:0.75rem; border-radius:6px;"></div>
+                        <div class="modal-footer" style="margin-top:1rem; padding-right:0; padding-bottom:0;">
+                            <button type="submit" class="btn btn-primary" id="register-submit-btn">Create Account</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal 2: Save Snippet to Database -->
+        <div id="save-snippet-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="save-modal-title">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="save-modal-title"><span>💾</span> Save Snippet to Database</h3>
+                    <button class="modal-close" id="save-snippet-close" aria-label="Close dialog">✕</button>
+                </div>
+                <form id="save-snippet-form">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="form-label" for="snippet-title-input">Snippet Title</label>
+                            <input class="form-input" id="snippet-title-input" type="text" required placeholder="e.g. My Factorial Function" maxlength="100">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="snippet-desc-input">Description (Optional)</label>
+                            <input class="form-input" id="snippet-desc-input" type="text" placeholder="Short description of this program" maxlength="250">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="snippet-lang-display">Language</label>
+                            <input class="form-input" id="snippet-lang-display" type="text" readonly style="opacity:0.8;">
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.25rem;">
+                            <input type="checkbox" id="snippet-public-check">
+                            <label for="snippet-public-check" class="form-label" style="cursor:pointer; margin:0;">Make public (visible in community catalog)</label>
+                        </div>
+                        <div id="save-snippet-error" class="error-banner hidden" style="border-radius:6px;"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-ghost" id="save-snippet-cancel">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="save-snippet-submit">Save Snippet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal 3: Snippets Library (Database CRUD) -->
+        <div id="snippets-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="snippets-modal-title">
+            <div class="modal-card modal-lg">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="snippets-modal-title"><span>📁</span> Database Snippets Library</h3>
+                    <button class="modal-close" id="snippets-modal-close" aria-label="Close dialog">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-tabs" role="tablist">
+                        <button class="modal-tab-btn active" id="tab-my-snippets-btn" type="button">My Saved Snippets</button>
+                        <button class="modal-tab-btn" id="tab-public-snippets-btn" type="button">Community Public Snippets</button>
+                    </div>
+                    <div id="snippets-loading" style="text-align:center; padding:1.5rem; color:var(--text-dim);">Connecting to database...</div>
+                    <div id="snippets-list-container" class="snippets-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal 4: Admin Dashboard (Role-Based Access Control) -->
+        <div id="admin-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+            <div class="modal-card modal-lg">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="admin-modal-title"><span>👑</span> Administrative Control Panel</h3>
+                    <button class="modal-close" id="admin-modal-close" aria-label="Close dialog">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="stat-grid" id="admin-stats-grid">
+                        <div class="stat-box">
+                            <span class="stat-val" id="stat-users-val">-</span>
+                            <span class="stat-lbl">Total Users</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-val" id="stat-snippets-val">-</span>
+                            <span class="stat-lbl">Total Snippets</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-val" id="stat-db-status">Online</span>
+                            <span class="stat-lbl">DB Connection</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-val" id="stat-db-dialect">sqlite3</span>
+                            <span class="stat-lbl">DB Dialect</span>
+                        </div>
+                    </div>
+
+                    <div class="modal-tabs" role="tablist">
+                        <button class="modal-tab-btn active" id="tab-admin-users-btn" type="button">Users</button>
+                        <button class="modal-tab-btn" id="tab-admin-snippets-btn" type="button">All Snippets</button>
+                    </div>
+
+                    <div id="admin-content-users">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Joined</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-users-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div id="admin-content-snippets" class="hidden">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Lang</th>
+                                    <th>Visibility</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-snippets-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -2128,6 +2681,516 @@ document.addEventListener("DOMContentLoaded", () => {
     function escapeHtml(text) {
         if (!text) return "";
         return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // =========================================================================
+    // DATABASE, AUTHENTICATION & RBAC LOGIC (CHECKS 5, 6, 7)
+    // =========================================================================
+    let currentUser = null;
+    let authToken = localStorage.getItem("sudarshan_token") || null;
+
+    const authBtn = document.getElementById("auth-btn");
+    const userMenu = document.getElementById("user-menu");
+    const navUsername = document.getElementById("nav-username");
+    const navRoleBadge = document.getElementById("nav-role-badge");
+    const logoutBtn = document.getElementById("logout-btn");
+    const saveSnippetBtn = document.getElementById("save-snippet-btn");
+    const mySnippetsBtn = document.getElementById("my-snippets-btn");
+    const adminPanelBtn = document.getElementById("admin-panel-btn");
+
+    const authModal = document.getElementById("auth-modal");
+    const authModalClose = document.getElementById("auth-modal-close");
+    const tabLoginBtn = document.getElementById("tab-login-btn");
+    const tabRegisterBtn = document.getElementById("tab-register-btn");
+    const loginForm = document.getElementById("login-form");
+    const registerForm = document.getElementById("register-form");
+    const loginError = document.getElementById("login-error");
+    const registerError = document.getElementById("register-error");
+    const demoDevBtn = document.getElementById("demo-dev-btn");
+    const demoAdminBtn = document.getElementById("demo-admin-btn");
+
+    const saveSnippetModal = document.getElementById("save-snippet-modal");
+    const saveSnippetClose = document.getElementById("save-snippet-close");
+    const saveSnippetCancel = document.getElementById("save-snippet-cancel");
+    const saveSnippetForm = document.getElementById("save-snippet-form");
+    const snippetTitleInput = document.getElementById("snippet-title-input");
+    const snippetDescInput = document.getElementById("snippet-desc-input");
+    const snippetLangDisplay = document.getElementById("snippet-lang-display");
+    const snippetPublicCheck = document.getElementById("snippet-public-check");
+    const saveSnippetError = document.getElementById("save-snippet-error");
+
+    const snippetsModal = document.getElementById("snippets-modal");
+    const snippetsModalClose = document.getElementById("snippets-modal-close");
+    const tabMySnippetsBtn = document.getElementById("tab-my-snippets-btn");
+    const tabPublicSnippetsBtn = document.getElementById("tab-public-snippets-btn");
+    const snippetsLoading = document.getElementById("snippets-loading");
+    const snippetsListContainer = document.getElementById("snippets-list-container");
+
+    const adminModal = document.getElementById("admin-modal");
+    const adminModalClose = document.getElementById("admin-modal-close");
+    const tabAdminUsersBtn = document.getElementById("tab-admin-users-btn");
+    const tabAdminSnippetsBtn = document.getElementById("tab-admin-snippets-btn");
+    const adminContentUsers = document.getElementById("admin-content-users");
+    const adminContentSnippets = document.getElementById("admin-content-snippets");
+    const adminUsersTbody = document.getElementById("admin-users-tbody");
+    const adminSnippetsTbody = document.getElementById("admin-snippets-tbody");
+
+    function updateAuthUI() {
+        if (currentUser && authToken) {
+            if (authBtn) authBtn.classList.add("hidden");
+            if (userMenu) userMenu.classList.remove("hidden");
+            if (navUsername) navUsername.textContent = currentUser.username;
+            if (navRoleBadge) {
+                navRoleBadge.textContent = currentUser.role;
+                if (currentUser.role === "admin") {
+                    navRoleBadge.className = "role-badge admin";
+                    if (adminPanelBtn) adminPanelBtn.classList.remove("hidden");
+                } else {
+                    navRoleBadge.className = "role-badge";
+                    if (adminPanelBtn) adminPanelBtn.classList.add("hidden");
+                }
+            }
+        } else {
+            if (authBtn) authBtn.classList.remove("hidden");
+            if (userMenu) userMenu.classList.add("hidden");
+            if (adminPanelBtn) adminPanelBtn.classList.add("hidden");
+        }
+    }
+
+    async function checkAuthStatus() {
+        if (!authToken) {
+            updateAuthUI();
+            return;
+        }
+        try {
+            const res = await fetch("/api/auth/me", {
+                headers: { "Authorization": `Bearer ${authToken}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                currentUser = data.user;
+            } else {
+                currentUser = null;
+                authToken = null;
+                localStorage.removeItem("sudarshan_token");
+            }
+        } catch (e) {
+            console.error("Auth check failed:", e);
+        }
+        updateAuthUI();
+    }
+
+    checkAuthStatus();
+
+    // Open / Close Auth Modal
+    if (authBtn) {
+        authBtn.addEventListener("click", () => {
+            if (authModal) authModal.classList.remove("hidden");
+        });
+    }
+    if (authModalClose) {
+        authModalClose.addEventListener("click", () => {
+            if (authModal) authModal.classList.add("hidden");
+        });
+    }
+
+    // Modal Tabs
+    if (tabLoginBtn && tabRegisterBtn) {
+        tabLoginBtn.addEventListener("click", () => {
+            tabLoginBtn.classList.add("active");
+            tabRegisterBtn.classList.remove("active");
+            if (loginForm) loginForm.classList.remove("hidden");
+            if (registerForm) registerForm.classList.add("hidden");
+        });
+        tabRegisterBtn.addEventListener("click", () => {
+            tabRegisterBtn.classList.add("active");
+            tabLoginBtn.classList.remove("active");
+            if (registerForm) registerForm.classList.remove("hidden");
+            if (loginForm) loginForm.classList.add("hidden");
+        });
+    }
+
+    // Quick demo buttons
+    if (demoDevBtn) {
+        demoDevBtn.addEventListener("click", () => {
+            const u = document.getElementById("login-username");
+            const p = document.getElementById("login-password");
+            if (u) u.value = "developer";
+            if (p) p.value = "Dev@123";
+        });
+    }
+    if (demoAdminBtn) {
+        demoAdminBtn.addEventListener("click", () => {
+            const u = document.getElementById("login-username");
+            const p = document.getElementById("login-password");
+            if (u) u.value = "admin";
+            if (p) p.value = "Admin@123";
+        });
+    }
+
+    // Login Form Submit
+    if (loginForm) {
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const usernameInput = document.getElementById("login-username");
+            const passwordInput = document.getElementById("login-password");
+            if (!usernameInput || !passwordInput) return;
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            if (loginError) loginError.classList.add("hidden");
+
+            try {
+                const res = await fetch("/api/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    localStorage.setItem("sudarshan_token", authToken);
+                    updateAuthUI();
+                    if (authModal) authModal.classList.add("hidden");
+                } else {
+                    if (loginError) {
+                        loginError.textContent = data.detail || "Authentication failed.";
+                        loginError.classList.remove("hidden");
+                    }
+                }
+            } catch (err) {
+                if (loginError) {
+                    loginError.textContent = "Network error during login: " + err.message;
+                    loginError.classList.remove("hidden");
+                }
+            }
+        });
+    }
+
+    // Register Form Submit
+    if (registerForm) {
+        registerForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const usernameInput = document.getElementById("reg-username");
+            const emailInput = document.getElementById("reg-email");
+            const passwordInput = document.getElementById("reg-password");
+            if (!usernameInput || !emailInput || !passwordInput) return;
+            const username = usernameInput.value.trim();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            if (registerError) registerError.classList.add("hidden");
+
+            try {
+                const res = await fetch("/api/auth/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, email, password })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    localStorage.setItem("sudarshan_token", authToken);
+                    updateAuthUI();
+                    if (authModal) authModal.classList.add("hidden");
+                } else {
+                    if (registerError) {
+                        registerError.textContent = data.detail || "Registration failed.";
+                        registerError.classList.remove("hidden");
+                    }
+                }
+            } catch (err) {
+                if (registerError) {
+                    registerError.textContent = "Network error during signup: " + err.message;
+                    registerError.classList.remove("hidden");
+                }
+            }
+        });
+    }
+
+    // Logout
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+            currentUser = null;
+            authToken = null;
+            localStorage.removeItem("sudarshan_token");
+            updateAuthUI();
+        });
+    }
+
+    // Save Snippet Modal
+    if (saveSnippetBtn) {
+        saveSnippetBtn.addEventListener("click", () => {
+            if (!currentUser) {
+                if (authModal) authModal.classList.remove("hidden");
+                return;
+            }
+            if (snippetLangDisplay) snippetLangDisplay.value = currentLanguage.toUpperCase();
+            if (snippetTitleInput) snippetTitleInput.value = "";
+            if (snippetDescInput) snippetDescInput.value = "";
+            if (saveSnippetError) saveSnippetError.classList.add("hidden");
+            if (saveSnippetModal) saveSnippetModal.classList.remove("hidden");
+        });
+    }
+    if (saveSnippetClose) saveSnippetClose.addEventListener("click", () => saveSnippetModal.classList.add("hidden"));
+    if (saveSnippetCancel) saveSnippetCancel.addEventListener("click", () => saveSnippetModal.classList.add("hidden"));
+
+    if (saveSnippetForm) {
+        saveSnippetForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (!snippetTitleInput) return;
+            const title = snippetTitleInput.value.trim();
+            const description = snippetDescInput ? snippetDescInput.value.trim() : "";
+            const is_public = snippetPublicCheck ? snippetPublicCheck.checked : false;
+            const code = editor.value;
+
+            try {
+                const res = await fetch("/api/snippets", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        title,
+                        description,
+                        language: currentLanguage,
+                        code,
+                        is_public
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    saveSnippetModal.classList.add("hidden");
+                    alert("Snippet saved successfully to database!");
+                } else {
+                    if (saveSnippetError) {
+                        saveSnippetError.textContent = data.detail || "Failed to save snippet.";
+                        saveSnippetError.classList.remove("hidden");
+                    }
+                }
+            } catch (err) {
+                if (saveSnippetError) {
+                    saveSnippetError.textContent = "Network error: " + err.message;
+                    saveSnippetError.classList.remove("hidden");
+                }
+            }
+        });
+    }
+
+    // Snippets Library Modal
+    let activeSnippetsTab = "my";
+    async function loadSnippetsList() {
+        if (snippetsLoading) snippetsLoading.classList.remove("hidden");
+        if (snippetsListContainer) snippetsListContainer.innerHTML = "";
+
+        const url = activeSnippetsTab === "my" ? "/api/snippets" : "/api/snippets/public";
+        const headers = authToken ? { "Authorization": `Bearer ${authToken}` } : {};
+
+        try {
+            const res = await fetch(url, { headers });
+            const data = await res.json();
+            if (snippetsLoading) snippetsLoading.classList.add("hidden");
+
+            if (res.ok && data.snippets) {
+                if (data.snippets.length === 0) {
+                    snippetsListContainer.innerHTML = `<div style="text-align:center; padding:1.5rem; color:var(--text-dim);">No saved snippets found. Click "Save" in the navbar to save your first code snippet.</div>`;
+                    return;
+                }
+
+                snippetsListContainer.innerHTML = data.snippets.map(s => `
+                    <div class="snippet-card">
+                        <div class="snippet-info">
+                            <div class="snippet-title">${escapeHtml(s.title)}</div>
+                            <div class="snippet-meta">
+                                <span class="role-badge">${escapeHtml(s.language)}</span>
+                                <span>${s.author ? 'by ' + escapeHtml(s.author) : (s.is_public ? '🌐 Public' : '🔒 Private')}</span>
+                                <span>${new Date(s.updated_at).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        <div class="snippet-actions">
+                            <button class="btn btn-sm btn-primary load-snippet-btn" data-id="${s.id}" data-lang="${escapeHtml(s.language)}">Load</button>
+                            ${activeSnippetsTab === "my" || (currentUser && currentUser.role === "admin") ? `
+                                <button class="btn btn-sm btn-ghost del-snippet-btn" data-id="${s.id}" style="color:var(--danger);">Delete</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join("");
+
+                // Bind Load buttons
+                snippetsListContainer.querySelectorAll(".load-snippet-btn").forEach(btn => {
+                    btn.addEventListener("click", async () => {
+                        const id = btn.getAttribute("data-id");
+                        const lang = btn.getAttribute("data-lang");
+                        try {
+                            const getRes = await fetch(`/api/snippets/${id}`, { headers });
+                            const getData = await getRes.json();
+                            if (getRes.ok && getData.snippet) {
+                                if (languageSelect && lang) {
+                                    languageSelect.value = lang.toLowerCase();
+                                    switchLanguage(lang.toLowerCase());
+                                }
+                                editor.value = getData.snippet.code;
+                                updateLineNumbers();
+                                snippetsModal.classList.add("hidden");
+                            }
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    });
+                });
+
+                // Bind Delete buttons
+                snippetsListContainer.querySelectorAll(".del-snippet-btn").forEach(btn => {
+                    btn.addEventListener("click", async () => {
+                        const id = btn.getAttribute("data-id");
+                        if (!confirm("Are you sure you want to delete this snippet?")) return;
+                        try {
+                            const delRes = await fetch(`/api/snippets/${id}`, {
+                                method: "DELETE",
+                                headers: { "Authorization": `Bearer ${authToken}` }
+                            });
+                            if (delRes.ok) {
+                                loadSnippetsList();
+                            }
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    });
+                });
+            } else {
+                snippetsListContainer.innerHTML = `<div style="color:var(--danger); padding:1rem;">Failed to load snippets: ${data.detail || "Authentication required."}</div>`;
+            }
+        } catch (err) {
+            if (snippetsLoading) snippetsLoading.classList.add("hidden");
+            snippetsListContainer.innerHTML = `<div style="color:var(--danger); padding:1rem;">Network error: ${err.message}</div>`;
+        }
+    }
+
+    if (mySnippetsBtn) {
+        mySnippetsBtn.addEventListener("click", () => {
+            activeSnippetsTab = currentUser ? "my" : "public";
+            if (tabMySnippetsBtn) {
+                if (activeSnippetsTab === "my") {
+                    tabMySnippetsBtn.classList.add("active");
+                    if (tabPublicSnippetsBtn) tabPublicSnippetsBtn.classList.remove("active");
+                } else {
+                    tabMySnippetsBtn.classList.remove("active");
+                    if (tabPublicSnippetsBtn) tabPublicSnippetsBtn.classList.add("active");
+                }
+            }
+            if (snippetsModal) snippetsModal.classList.remove("hidden");
+            loadSnippetsList();
+        });
+    }
+    if (snippetsModalClose) snippetsModalClose.addEventListener("click", () => snippetsModal.classList.add("hidden"));
+
+    if (tabMySnippetsBtn) {
+        tabMySnippetsBtn.addEventListener("click", () => {
+            activeSnippetsTab = "my";
+            tabMySnippetsBtn.classList.add("active");
+            tabPublicSnippetsBtn.classList.remove("active");
+            loadSnippetsList();
+        });
+    }
+    if (tabPublicSnippetsBtn) {
+        tabPublicSnippetsBtn.addEventListener("click", () => {
+            activeSnippetsTab = "public";
+            tabPublicSnippetsBtn.classList.add("active");
+            tabMySnippetsBtn.classList.remove("active");
+            loadSnippetsList();
+        });
+    }
+
+    // Admin Panel Modal & RBAC
+    async function loadAdminData() {
+        if (!currentUser || currentUser.role !== "admin" || !authToken) return;
+        const headers = { "Authorization": `Bearer ${authToken}` };
+
+        try {
+            const statsRes = await fetch("/api/admin/stats", { headers });
+            if (statsRes.ok) {
+                const sData = await statsRes.json();
+                const uVal = document.getElementById("stat-users-val");
+                const sVal = document.getElementById("stat-snippets-val");
+                const dbStatus = document.getElementById("stat-db-status");
+                const dbDialect = document.getElementById("stat-db-dialect");
+                if (uVal && sData.database && sData.database.tables) uVal.textContent = sData.database.tables.users;
+                if (sVal && sData.database && sData.database.tables) sVal.textContent = sData.database.tables.snippets;
+                if (dbStatus && sData.database) dbStatus.textContent = sData.database.status === "connected" ? "Online" : "Error";
+                if (dbDialect && sData.database) dbDialect.textContent = sData.database.dialect;
+            }
+
+            const usersRes = await fetch("/api/admin/users", { headers });
+            if (usersRes.ok) {
+                const uData = await usersRes.json();
+                if (adminUsersTbody) {
+                    adminUsersTbody.innerHTML = uData.users.map(u => `
+                        <tr>
+                            <td>#${u.id}</td>
+                            <td style="font-weight:600; color:var(--text-main);">${escapeHtml(u.username)}</td>
+                            <td>${escapeHtml(u.email)}</td>
+                            <td><span class="role-badge ${u.role === 'admin' ? 'admin' : ''}">${escapeHtml(u.role)}</span></td>
+                            <td>${new Date(u.created_at).toLocaleDateString()}</td>
+                        </tr>
+                    `).join("");
+                }
+            }
+
+            const snipRes = await fetch("/api/admin/snippets", { headers });
+            if (snipRes.ok) {
+                const snipData = await snipRes.json();
+                if (adminSnippetsTbody) {
+                    adminSnippetsTbody.innerHTML = snipData.snippets.map(s => `
+                        <tr>
+                            <td>#${s.id}</td>
+                            <td style="font-weight:600; color:var(--text-main);">${escapeHtml(s.title)}</td>
+                            <td>${escapeHtml(s.author)}</td>
+                            <td><span class="role-badge">${escapeHtml(s.language)}</span></td>
+                            <td>${s.is_public ? '🌐 Public' : '🔒 Private'}</td>
+                            <td><button class="btn btn-sm btn-ghost admin-del-btn" data-id="${s.id}" style="color:var(--danger);">Delete</button></td>
+                        </tr>
+                    `).join("");
+
+                    adminSnippetsTbody.querySelectorAll(".admin-del-btn").forEach(btn => {
+                        btn.addEventListener("click", async () => {
+                            const id = btn.getAttribute("data-id");
+                            if (!confirm(`Administrator action: Delete snippet #${id}?`)) return;
+                            await fetch(`/api/admin/snippets/${id}`, {
+                                method: "DELETE",
+                                headers
+                            });
+                            loadAdminData();
+                        });
+                    });
+                }
+            }
+        } catch (e) {
+            console.error("Admin data load error:", e);
+        }
+    }
+
+    if (adminPanelBtn) {
+        adminPanelBtn.addEventListener("click", () => {
+            if (adminModal) adminModal.classList.remove("hidden");
+            loadAdminData();
+        });
+    }
+    if (adminModalClose) adminModalClose.addEventListener("click", () => adminModal.classList.add("hidden"));
+
+    if (tabAdminUsersBtn && tabAdminSnippetsBtn) {
+        tabAdminUsersBtn.addEventListener("click", () => {
+            tabAdminUsersBtn.classList.add("active");
+            tabAdminSnippetsBtn.classList.remove("active");
+            if (adminContentUsers) adminContentUsers.classList.remove("hidden");
+            if (adminContentSnippets) adminContentSnippets.classList.add("hidden");
+        });
+        tabAdminSnippetsBtn.addEventListener("click", () => {
+            tabAdminSnippetsBtn.classList.add("active");
+            tabAdminUsersBtn.classList.remove("active");
+            if (adminContentSnippets) adminContentSnippets.classList.remove("hidden");
+            if (adminContentUsers) adminContentUsers.classList.add("hidden");
+        });
     }
 });
 

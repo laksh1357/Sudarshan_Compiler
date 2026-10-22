@@ -8,6 +8,14 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.routes import health, examples, compilation
+from backend.app.routes import auth_routes, snippets_routes, admin_routes, db_health_routes
+from backend.app.db import init_db
+
+# Initialize database schema and seeds on startup
+try:
+    init_db()
+except Exception as _e:
+    pass
 
 app = FastAPI(
     title="Sudarshan Compiler Studio API",
@@ -56,10 +64,18 @@ async def check_payload_limit(request: Request, call_next):
 app.include_router(health.router, prefix="/api")
 app.include_router(examples.router, prefix="/api")
 app.include_router(compilation.router, prefix="/api")
+app.include_router(auth_routes.router, prefix="/api")
+app.include_router(snippets_routes.router, prefix="/api")
+app.include_router(admin_routes.router, prefix="/api")
+app.include_router(db_health_routes.router, prefix="/api")
 
 app.include_router(health.router, prefix="")
 app.include_router(examples.router, prefix="")
 app.include_router(compilation.router, prefix="")
+app.include_router(auth_routes.router, prefix="")
+app.include_router(snippets_routes.router, prefix="")
+app.include_router(admin_routes.router, prefix="")
+app.include_router(db_health_routes.router, prefix="")
 
 
 from fastapi.responses import JSONResponse, FileResponse
@@ -78,6 +94,12 @@ def api_root():
         "docs": "/docs",
         "endpoints": {
             "health": "/api/health",
+            "db_health": "/api/db/health",
+            "auth_register": "POST /api/auth/register",
+            "auth_login": "POST /api/auth/login",
+            "auth_me": "GET /api/auth/me",
+            "snippets": "/api/snippets",
+            "admin_stats": "GET /api/admin/stats",
             "examples": "/api/examples",
             "compile": "POST /api/compile",
             "compile_run": "POST /api/compile-run",

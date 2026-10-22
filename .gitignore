@@ -28,3 +28,8 @@ build/
 # Vercel deployment artifacts
 .vercel
 .env*
+
+# Local SQLite databases
+*.db
+*.sqlite
+*.sqlite3
