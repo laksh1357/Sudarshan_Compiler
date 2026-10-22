@@ -1,11 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
     const editor = document.getElementById("code-editor");
     const lineNumbers = document.getElementById("line-numbers");
+    const languageSelect = document.getElementById("language-select");
+    const editorTitle = document.getElementById("editor-title");
+    const editorLangIcon = document.getElementById("editor-lang-icon");
     const presetSelect = document.getElementById("preset-select");
     const runBtn = document.getElementById("run-btn");
     const clearBtn = document.getElementById("clear-btn");
     const copyBtn = document.getElementById("copy-btn");
     const optToggle = document.getElementById("opt-toggle");
+    const stdinInput = document.getElementById("stdin-input");
+    const terminalTitle = document.getElementById("terminal-title");
     
     const errorBanner = document.getElementById("error-banner");
     const errorContent = document.getElementById("error-content");
@@ -22,7 +27,127 @@ document.addEventListener("DOMContentLoaded", () => {
     const optBehaviorText = document.getElementById("opt-behavior-text");
     const consoleOutput = document.getElementById("console-output");
 
+    // Centralized Language Configuration Dictionary
+    const LANGUAGES = {
+        sudarshan: {
+            id: "sudarshan",
+            name: "Sudarshan",
+            title: "Sudarshan Source Code (main.mini)",
+            badge: "⚡",
+            icon: "⚡",
+            placeholder: "// Type your Sudarshan code here...\n\nint a = 15;\nint b = a + 25;\nprint(b);",
+            defaultCode: `// Welcome to Sudarshan Compiler Studio\n// Interactive Multi-Phase Compiler Laboratory\n\nint x = 10;\nint y = 20;\nint sum = 0;\n\nwhile (x > 0) {\n    sum = sum + x;\n    x = x - 1;\n}\n\nif (sum > 50) {\n    print(sum);\n} else {\n    print(y);\n}\n`,
+            runtimeTitle: "sudarshan-vm --run",
+            presets: {
+                "valid.mini": "valid.mini (While Loop & Branches)",
+                "opt_test.mini": "opt_test.mini (Constant Folding)",
+                "nested_scope.mini": "nested_scope.mini (Block Scoping)",
+                "algebraic.mini": "algebraic.mini (Algebraic Identities)",
+                "loop_factorial.mini": "loop_factorial.mini (Factorial)",
+                "error_syntax.mini": "error_syntax.mini (Syntax Error Demo)",
+                "error_semantic.mini": "error_semantic.mini (Semantic Error Demo)",
+                "error_lexical.mini": "error_lexical.mini (Lexer Error Demo)",
+                "error_runtime.mini": "error_runtime.mini (Runtime Error Demo)",
+                "custom": "✏️ Custom Program"
+            }
+        },
+        python: {
+            id: "python",
+            name: "Python 3",
+            title: "Python Source Code (main.py)",
+            badge: "🐍",
+            icon: "🐍",
+            placeholder: "# Type your Python 3 code here...\n\ndef greet(name):\n    return f'Hello, {name}!'\n\nprint(greet('World'))",
+            defaultCode: `# Python 3 - Interactive Execution\ndef fibonacci(n):\n    seq = [0, 1]\n    for _ in range(2, n):\n        seq.append(seq[-1] + seq[-2])\n    return seq\n\nprint("=== Python 3 Fibonacci Generator ===")\nprint("First 10 numbers:", fibonacci(10))\n`,
+            runtimeTitle: "python3 main.py",
+            presets: {
+                "fibonacci.py": "fibonacci.py (Fibonacci Generator)",
+                "primes.py": "primes.py (Sieve of Eratosthenes)",
+                "quicksort.py": "quicksort.py (Recursive Quicksort)",
+                "custom": "✏️ Custom Program"
+            }
+        },
+        c: {
+            id: "c",
+            name: "C (GCC 13)",
+            title: "C Source Code (main.c)",
+            badge: "🇨",
+            icon: "🇨",
+            placeholder: "// Type your C code here...\n#include <stdio.h>\n\nint main(void) {\n    printf(\"Hello, World!\\n\");\n    return 0;\n}",
+            defaultCode: `#include <stdio.h>\n\nint main(void) {\n    printf("=== C (GCC 13) Execution ===\\n");\n    int sum = 0;\n    for (int i = 1; i <= 10; i++) {\n        sum += i;\n    }\n    printf("Sum of 1..10 = %d\\n", sum);\n    return 0;\n}\n`,
+            runtimeTitle: "gcc -O2 main.c && ./a.out",
+            presets: {
+                "hello.c": "hello.c (Loop & Standard I/O)",
+                "pointers.c": "pointers.c (Pointer Swap)",
+                "bubble_sort.c": "bubble_sort.c (Bubble Sort Array)",
+                "custom": "✏️ Custom Program"
+            }
+        },
+        cpp: {
+            id: "cpp",
+            name: "C++ (GCC 13)",
+            title: "C++ Source Code (main.cpp)",
+            badge: "➕",
+            icon: "➕",
+            placeholder: "// Type your C++ code here...\n#include <iostream>\n\nint main() {\n    std::cout << \"Hello from C++!\" << std::endl;\n    return 0;\n}",
+            defaultCode: `#include <iostream>\n#include <vector>\n#include <numeric>\n\nint main() {\n    std::cout << "=== C++20 Standard Library Demo ===\\n";\n    std::vector<int> numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};\n    int sum = std::accumulate(numbers.begin(), numbers.end(), 0);\n    std::cout << "Sum: " << sum << "\\n";\n    return 0;\n}\n`,
+            runtimeTitle: "g++ -O2 -std=c++20 main.cpp && ./a.out",
+            presets: {
+                "vectors.cpp": "vectors.cpp (STL Vectors & Sum)",
+                "templates.cpp": "templates.cpp (Generic Templates)",
+                "custom": "✏️ Custom Program"
+            }
+        },
+        java: {
+            id: "java",
+            name: "Java (OpenJDK 21)",
+            title: "Java Source Code (Main.java)",
+            badge: "☕",
+            icon: "☕",
+            placeholder: "// Type your Java code here...\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello, World!\");\n    }\n}",
+            defaultCode: `public class Main {\n    public static long factorial(int n) {\n        long result = 1;\n        for (int i = 2; i <= n; i++) result *= i;\n        return result;\n    }\n\n    public static void main(String[] args) {\n        System.out.println("=== Java 21 Execution ===");\n        int num = 8;\n        System.out.println("Factorial of " + num + " = " + factorial(num));\n    }\n}\n`,
+            runtimeTitle: "javac Main.java && java Main",
+            presets: {
+                "Factorial.java": "Factorial.java (Factorial Calculation)",
+                "BinarySearch.java": "BinarySearch.java (Binary Search Algorithm)",
+                "custom": "✏️ Custom Program"
+            }
+        },
+        javascript: {
+            id: "javascript",
+            name: "JavaScript (Node 20)",
+            title: "JavaScript Source Code (index.js)",
+            badge: "🟨",
+            icon: "🟨",
+            placeholder: "// Type your JavaScript code here...\nconsole.log(\"Hello from Node.js!\");",
+            defaultCode: `function findPrimes(limit) {\n    const primes = [];\n    for (let i = 2; i <= limit; i++) {\n        let isPrime = true;\n        for (let j = 2; j * j <= i; j++) {\n            if (i % j === 0) { isPrime = false; break; }\n        }\n        if (isPrime) primes.push(i);\n    }\n    return primes;\n}\n\nconsole.log("=== Node.js Execution ===");\nconsole.log("Primes up to 40:", findPrimes(40));\n`,
+            runtimeTitle: "node index.js",
+            presets: {
+                "primes.js": "primes.js (Primes Sieve)",
+                "async.js": "async.js (Async/Await Promises)",
+                "custom": "✏️ Custom Program"
+            }
+        },
+        typescript: {
+            id: "typescript",
+            name: "TypeScript (TS 5.6)",
+            title: "TypeScript Source Code (index.ts)",
+            badge: "🔷",
+            icon: "🔷",
+            placeholder: "// Type your TypeScript code here...\ninterface User {\n    name: string;\n}\nconst u: User = { name: 'Dev' };\nconsole.log(u.name);",
+            defaultCode: `interface CompilerConfig {\n    name: string;\n    version: string;\n    strict: boolean;\n    targets: string[];\n}\n\nfunction printSummary(config: CompilerConfig): void {\n    console.log(\`[\${config.name} v\${config.version}]\`);\n    console.log(\`Strict mode: \${config.strict}\`);\n    console.log(\`Targets: \${config.targets.join(", ")}\`);\n}\n\nconst studioConfig: CompilerConfig = {\n    name: "Sudarshan Studio",\n    version: "2.0.0",\n    strict: true,\n    targets: ["Python", "C", "C++", "Java", "JavaScript", "TypeScript", "Sudarshan"]\n};\n\nprintSummary(studioConfig);\n`,
+            runtimeTitle: "tsc index.ts && node index.js",
+            presets: {
+                "interfaces.ts": "interfaces.ts (Interfaces & Config)",
+                "custom": "✏️ Custom Program"
+            }
+        }
+    };
+
+    let currentLanguage = "sudarshan";
+    const userCodeCache = {};
     let presetsData = {};
+    let allPresetsCatalog = {};
     let currentAstJson = null;
     let currentAstRaw = "";
 
@@ -32,7 +157,11 @@ document.addEventListener("DOMContentLoaded", () => {
         lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join("<br>");
     }
 
-    editor.addEventListener("input", updateLineNumbers);
+    editor.addEventListener("input", () => {
+        userCodeCache[currentLanguage] = editor.value;
+        updateLineNumbers();
+    });
+
     editor.addEventListener("scroll", () => {
         lineNumbers.scrollTop = editor.scrollTop;
     });
@@ -45,25 +174,97 @@ document.addEventListener("DOMContentLoaded", () => {
             const end = editor.selectionEnd;
             editor.value = editor.value.substring(0, start) + "    " + editor.value.substring(end);
             editor.selectionStart = editor.selectionEnd = start + 4;
+            userCodeCache[currentLanguage] = editor.value;
             updateLineNumbers();
         }
     });
 
+    // Populate preset dropdown for the given language
+    function populatePresetsDropdown(langId) {
+        if (!presetSelect) return;
+        const config = LANGUAGES[langId];
+        if (!config || !config.presets) return;
+
+        presetSelect.innerHTML = "";
+        Object.entries(config.presets).forEach(([val, label]) => {
+            const opt = document.createElement("option");
+            opt.value = val;
+            opt.textContent = label;
+            presetSelect.appendChild(opt);
+        });
+    }
+
+    // Switch programming language safely without losing typed code
+    function switchLanguage(newLang) {
+        if (!LANGUAGES[newLang]) return;
+
+        // 1. Save current buffer to memory cache
+        userCodeCache[currentLanguage] = editor.value;
+
+        // 2. Set active language
+        currentLanguage = newLang;
+        const langConfig = LANGUAGES[newLang];
+
+        // 3. Update Title, Icon, Placeholder, Terminal title
+        if (editorTitle) editorTitle.textContent = langConfig.title;
+        if (editorLangIcon) editorLangIcon.textContent = langConfig.icon;
+        if (terminalTitle) terminalTitle.textContent = langConfig.runtimeTitle;
+        editor.placeholder = langConfig.placeholder;
+
+        // 4. Update preset dropdown options
+        populatePresetsDropdown(newLang);
+
+        // 5. Restore user's saved code for this language or load starter/preset
+        if (userCodeCache[newLang] !== undefined && userCodeCache[newLang].trim() !== "") {
+            editor.value = userCodeCache[newLang];
+            presetSelect.value = "custom";
+        } else {
+            const firstPresetKey = Object.keys(langConfig.presets)[0];
+            if (firstPresetKey && firstPresetKey !== "custom" && allPresetsCatalog[newLang] && allPresetsCatalog[newLang][firstPresetKey]) {
+                editor.value = allPresetsCatalog[newLang][firstPresetKey];
+                presetSelect.value = firstPresetKey;
+            } else {
+                editor.value = langConfig.defaultCode;
+                presetSelect.value = firstPresetKey || "custom";
+            }
+            userCodeCache[newLang] = editor.value;
+        }
+
+        updateLineNumbers();
+        compileCode(false);
+    }
+
+    if (languageSelect) {
+        languageSelect.addEventListener("change", (e) => {
+            switchLanguage(e.target.value);
+        });
+    }
+
     // Fetch presets from Python backend
     fetch("/api/presets")
         .then(res => res.json())
-        .then(presets => {
-            presetsData = presets;
-            const defaultKey = presets["valid.mini"] ? "valid.mini" : Object.keys(presets)[0];
-            if (defaultKey && presets[defaultKey]) {
+        .then(data => {
+            if (data["__all_presets__"]) {
+                allPresetsCatalog = data["__all_presets__"];
+                presetsData = data["__all_presets__"]["sudarshan"] || data;
+            } else {
+                presetsData = data;
+            }
+
+            populatePresetsDropdown(currentLanguage);
+
+            const defaultKey = presetsData["valid.mini"] ? "valid.mini" : Object.keys(presetsData)[0];
+            if (defaultKey && presetsData[defaultKey]) {
                 presetSelect.value = defaultKey;
-                editor.value = presets[defaultKey];
+                editor.value = presetsData[defaultKey];
+                userCodeCache["sudarshan"] = editor.value;
                 updateLineNumbers();
                 compileCode();
             }
         })
         .catch(err => {
             console.warn("Could not load presets from /api/presets, fallback to default code:", err);
+            populatePresetsDropdown(currentLanguage);
             updateLineNumbers();
             compileCode();
         });
@@ -71,16 +272,25 @@ document.addEventListener("DOMContentLoaded", () => {
     // Preset dropdown selection
     presetSelect.addEventListener("change", (e) => {
         const val = e.target.value;
-        if (val !== "custom" && presetsData[val]) {
-            editor.value = presetsData[val];
+        if (val === "custom") return;
+
+        if (allPresetsCatalog[currentLanguage] && allPresetsCatalog[currentLanguage][val]) {
+            editor.value = allPresetsCatalog[currentLanguage][val];
+            userCodeCache[currentLanguage] = editor.value;
             updateLineNumbers();
-            compileCode();
+            compileCode(false);
+        } else if (presetsData[val]) {
+            editor.value = presetsData[val];
+            userCodeCache[currentLanguage] = editor.value;
+            updateLineNumbers();
+            compileCode(false);
         }
     });
 
     // Clear editor
     clearBtn.addEventListener("click", () => {
         editor.value = "";
+        userCodeCache[currentLanguage] = "";
         presetSelect.value = "custom";
         updateLineNumbers();
     });
@@ -181,19 +391,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function compileCode(shouldSwitchToConsole = false) {
         const code = editor.value;
+        const stdin = stdinInput ? stdinInput.value : "";
         const optimize = optToggle ? optToggle.checked : true;
+        const lang = currentLanguage;
+
         runBtn.innerHTML = `<span class="btn-icon">⏳</span> Compiling...`;
         errorBanner.classList.add("hidden");
 
         fetch("/api/compile", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ code, optimize })
+            body: JSON.stringify({ code, language: lang, stdin, optimize })
         })
         .then(res => res.json())
         .then(data => {
             runBtn.innerHTML = `<span class="btn-icon">▶</span> Compile &amp; Run`;
             
+            if (data.runtime_title && terminalTitle) {
+                terminalTitle.textContent = data.runtime_title;
+            }
+
             if (data.errors && data.errors.length > 0) {
                 showErrors(data.errors);
             }
@@ -236,13 +453,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     const errorDetail = (data.errors && data.errors.length > 0)
                         ? data.errors.join("\n")
-                        : "Compilation failed.";
-                    consoleOutput.innerHTML = `<div style="color: #ef4444; font-family: var(--font-mono); white-space: pre-wrap;">[Compilation Failed]\n\n${escapeHtml(errorDetail)}</div>`;
+                        : (data.output || "Compilation failed.");
+                    consoleOutput.innerHTML = `<div style="color: #ef4444; font-family: var(--font-mono); white-space: pre-wrap;">[Compilation / Runtime Failed]\n\n${escapeHtml(errorDetail)}</div>`;
                 }
             } catch (e) { console.error("Error rendering Console:", e); }
 
-            // If user clicked Compile & Run, or if there's an error, switch to console output tab
-            if (shouldSwitchToConsole || !data.success) {
+            // If user clicked Compile & Run, or if running non-sudarshan language, or error, switch to console output tab
+            if (shouldSwitchToConsole || lang !== "sudarshan" || !data.success) {
                 activateTab("tab-console");
             }
         })
@@ -250,7 +467,7 @@ document.addEventListener("DOMContentLoaded", () => {
             runBtn.innerHTML = `<span class="btn-icon">▶</span> Compile &amp; Run`;
             showErrors([err.message || "Failed to reach compilation server."]);
             consoleOutput.innerHTML = `<div style="color: #ef4444; font-family: var(--font-mono); white-space: pre-wrap;">[Network / Server Error]\n${escapeHtml(err.message)}</div>`;
-            if (shouldSwitchToConsole) {
+            if (shouldSwitchToConsole || lang !== "sudarshan") {
                 activateTab("tab-console");
             }
         });
@@ -270,18 +487,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const astTextView = document.getElementById("ast-text-view");
     const astSvg = document.getElementById("ast-svg");
 
-    graphBtn.addEventListener("click", () => setAstView("graph"));
-    cardsBtn.addEventListener("click", () => setAstView("cards"));
-    textBtn.addEventListener("click", () => setAstView("text"));
+    if (graphBtn && cardsBtn && textBtn) {
+        graphBtn.addEventListener("click", () => setAstView("graph"));
+        cardsBtn.addEventListener("click", () => setAstView("cards"));
+        textBtn.addEventListener("click", () => setAstView("text"));
+    }
 
     function setAstView(mode) {
-        graphBtn.classList.toggle("active", mode === "graph");
-        cardsBtn.classList.toggle("active", mode === "cards");
-        textBtn.classList.toggle("active", mode === "text");
+        if (graphBtn) graphBtn.classList.toggle("active", mode === "graph");
+        if (cardsBtn) cardsBtn.classList.toggle("active", mode === "cards");
+        if (textBtn) textBtn.classList.toggle("active", mode === "text");
 
-        astGraphContainer.classList.toggle("hidden", mode !== "graph");
-        astTreeView.classList.toggle("hidden", mode !== "cards");
-        astTextView.classList.toggle("hidden", mode !== "text");
+        if (astGraphContainer) astGraphContainer.classList.toggle("hidden", mode !== "graph");
+        if (astTreeView) astTreeView.classList.toggle("hidden", mode !== "cards");
+        if (astTextView) astTextView.classList.toggle("hidden", mode !== "text");
 
         try {
             if (mode === "graph") renderSVGTree(currentAstJson);
@@ -298,7 +517,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try { renderSVGTree(astJson); } catch (e) { console.error(e); }
         try { renderASTCards(astJson, rawAstText); } catch (e) { console.error(e); }
-        try { astTextView.textContent = rawAstText || "No AST generated."; } catch (e) { console.error(e); }
+        try { if (astTextView) astTextView.textContent = rawAstText || "No AST generated."; } catch (e) { console.error(e); }
     }
 
     // Interactive SVG Tree Layout Renderer
@@ -309,15 +528,15 @@ document.addEventListener("DOMContentLoaded", () => {
         // Build simplified node tree
         function buildNode(data) {
             if (!data) return null;
-            let label = data.label || data.type || "Node";
+            let label = data.label || data.name || data.type || "Node";
             let sublabel = data.line ? `Line ${data.line}` : "";
             let category = "expr";
             let children = [];
 
-            const t = data.type || "";
+            const t = data.type || data.name || "";
 
-            if (t === "Program" || t === "Block") {
-                label = t === "Program" ? "Root Program" : "Block";
+            if (t === "Program" || t === "Block" || t.includes("Program")) {
+                label = t.includes("Program") ? (data.label || "Root Program") : "Block";
                 sublabel = `${data.children ? data.children.length : 0} Stmts`;
                 category = "root";
                 if (data.children) children = data.children.map(buildNode);
@@ -507,7 +726,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderASTChild(node, depth) {
         const indent = depth * 20;
-        let title = node.label || node.type;
+        let title = node.label || node.name || node.type;
         let detail = node.line ? `Line ${node.line}` : "";
 
         let html = `<div style="margin-left: ${indent}px;" class="ast-node-card">
