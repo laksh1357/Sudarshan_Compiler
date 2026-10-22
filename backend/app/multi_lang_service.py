@@ -541,8 +541,8 @@ def execute_multi_lang(lang: str, code: str, stdin: str = "", optimize: bool = T
 
     analysis = analyze_code_structure(lang, code, optimize)
 
-    # Compile options (Wandbox expects newline-separated compiler options)
-    compiler_opts = "-O2" if optimize else "-O0"
+    # Compile options (only C/C++ accept GCC optimization flags like -O2)
+    compiler_opts = ""
     if lang == "cpp":
         compiler_opts = "-O2\n-std=c++20" if optimize else "-O0\n-std=c++20"
     elif lang == "c":
