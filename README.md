@@ -1,6 +1,6 @@
 # Sudarshan Compiler Studio & Virtual Machine
-[
-https://compilerproject-xi.vercel.app/](url)
+
+https://compilerproject-xi.vercel.app/
 
 [![Compiler Design Laboratory](https://img.shields.io/badge/Course-Compiler_Design_Laboratory-1B365D?style=for-the-badge)](https://github.com/laksh1357/Sudarshan_Compiler)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
