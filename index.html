@@ -1042,7 +1042,7 @@ input:checked + .slider:before {
             <div class="header-actions">
                 <div class="language-group">
                     <label for="language-select">Language:</label>
-                    <select id="language-select" class="lang-dropdown">
+                    <select id="language-select" class="lang-dropdown" aria-label="Select programming language">
                         <option value="sudarshan" selected>⚡ Sudarshan (.mini)</option>
                         <option value="python">🐍 Python (.py)</option>
                         <option value="c">🇨 C (.c)</option>
@@ -1054,7 +1054,7 @@ input:checked + .slider:before {
                 </div>
                 <div class="preset-group">
                     <label for="preset-select">Samples:</label>
-                    <select id="preset-select" class="preset-dropdown">
+                    <select id="preset-select" class="preset-dropdown" aria-label="Select code sample">
                         <option value="valid.mini">valid.mini (While Loop &amp; Branches)</option>
                         <option value="opt_test.mini">opt_test.mini (Constant Folding)</option>
                         <option value="nested_scope.mini">nested_scope.mini (Block Scoping)</option>
@@ -1069,12 +1069,12 @@ input:checked + .slider:before {
                 </div>
                 <div class="opt-toggle-group">
                     <label class="toggle-switch">
-                        <input type="checkbox" id="opt-toggle" checked>
+                        <input type="checkbox" id="opt-toggle" checked aria-label="Enable compiler optimization">
                         <span class="slider"></span>
                     </label>
                     <span class="opt-label">⚡ Optimize (-O1)</span>
                 </div>
-                <button id="run-btn" class="btn btn-primary">
+                <button id="run-btn" class="btn btn-primary" aria-label="Compile and run code">
                     <span class="btn-icon">▶</span> Compile &amp; Run
                 </button>
             </div>
@@ -1084,7 +1084,7 @@ input:checked + .slider:before {
         <div id="error-banner" class="error-banner hidden">
             <div class="error-icon">⚠️</div>
             <div class="error-content" id="error-content"></div>
-            <button class="error-close" id="error-close">×</button>
+            <button class="error-close" id="error-close" aria-label="Dismiss error">×</button>
         </div>
 
         <!-- Main Workspace Split Grid -->
@@ -1097,48 +1097,48 @@ input:checked + .slider:before {
                         <h2 id="editor-title">Sudarshan Source Code</h2>
                     </div>
                     <div class="pane-tools">
-                        <button id="clear-btn" class="btn-sm btn-ghost" title="Clear Editor">Clear</button>
-                        <button id="copy-btn" class="btn-sm btn-ghost" title="Copy Code">Copy</button>
+                        <button id="clear-btn" class="btn-sm btn-ghost" title="Clear Editor" aria-label="Clear editor">Clear</button>
+                        <button id="copy-btn" class="btn-sm btn-ghost" title="Copy Code" aria-label="Copy code to clipboard">Copy</button>
                     </div>
                 </div>
                 <div class="editor-container">
                     <div class="line-numbers" id="line-numbers">1</div>
-                    <textarea id="code-editor" class="code-editor" spellcheck="false" placeholder="// Type your Sudarshan code here...&#10;&#10;int a = 15;&#10;int b = a + 25;&#10;print(b);"></textarea>
+                    <textarea id="code-editor" class="code-editor" spellcheck="false" aria-label="Source code editor" placeholder="// Type your Sudarshan code here...&#10;&#10;int a = 15;&#10;int b = a + 25;&#10;print(b);"></textarea>
                 </div>
             </section>
 
             <!-- Right Side: Compilation Output Visualizer Tabs -->
             <section class="pane visualizer-pane">
-                <div class="tab-bar">
-                    <button class="tab-btn active" data-tab="tab-tokens">
+                <div class="tab-bar" role="tablist" aria-label="Compiler output tabs">
+                    <button class="tab-btn active" data-tab="tab-tokens" role="tab" aria-selected="true" aria-controls="tab-tokens">
                         <span class="tab-badge">1</span> Tokens
                     </button>
-                    <button class="tab-btn" data-tab="tab-ast">
+                    <button class="tab-btn" data-tab="tab-ast" role="tab" aria-selected="false" aria-controls="tab-ast">
                         <span class="tab-badge">2</span> AST Tree
                     </button>
-                    <button class="tab-btn" data-tab="tab-symtable">
+                    <button class="tab-btn" data-tab="tab-symtable" role="tab" aria-selected="false" aria-controls="tab-symtable">
                         <span class="tab-badge">3</span> Symbol Table
                     </button>
-                    <button class="tab-btn" data-tab="tab-semantics">
+                    <button class="tab-btn" data-tab="tab-semantics" role="tab" aria-selected="false" aria-controls="tab-semantics">
                         <span class="tab-badge">4</span> Semantics
                     </button>
-                    <button class="tab-btn" data-tab="tab-raw-ir">
+                    <button class="tab-btn" data-tab="tab-raw-ir" role="tab" aria-selected="false" aria-controls="tab-raw-ir">
                         <span class="tab-badge">5</span> Raw TAC
                     </button>
-                    <button class="tab-btn" data-tab="tab-opt-ir">
+                    <button class="tab-btn" data-tab="tab-opt-ir" role="tab" aria-selected="false" aria-controls="tab-opt-ir">
                         <span class="tab-badge">6</span> Opt TAC
                     </button>
-                    <button class="tab-btn" data-tab="tab-opt-behavior">
+                    <button class="tab-btn" data-tab="tab-opt-behavior" role="tab" aria-selected="false" aria-controls="tab-opt-behavior">
                         <span class="tab-badge">7</span> Opt Behavior
                     </button>
-                    <button class="tab-btn" data-tab="tab-console">
+                    <button class="tab-btn" data-tab="tab-console" role="tab" aria-selected="false" aria-controls="tab-console">
                         <span class="tab-badge">8</span> Output
                     </button>
                 </div>
 
                 <div class="tab-content-container">
                     <!-- Tab 1: Tokens -->
-                    <div class="tab-pane active" id="tab-tokens">
+                    <div class="tab-pane active" id="tab-tokens" role="tabpanel" aria-labelledby="tab-tokens-btn">
                         <div class="pane-subheading-bar">
                             <div class="pane-subheading">1. Expected lexical tokens</div>
                             <button class="btn-sm btn-ghost copy-text-btn" data-target="tokens-view">Copy</button>
@@ -1147,7 +1147,7 @@ input:checked + .slider:before {
                     </div>
 
                     <!-- Tab 2: AST -->
-                    <div class="tab-pane" id="tab-ast">
+                    <div class="tab-pane" id="tab-ast" role="tabpanel" aria-labelledby="tab-ast-btn">
                         <div class="pane-subheading-bar">
                             <div class="pane-subheading">2. Expected AST</div>
                             <div class="view-toggle">
@@ -1164,7 +1164,7 @@ input:checked + .slider:before {
                     </div>
 
                     <!-- Tab 3: Symbol Table -->
-                    <div class="tab-pane" id="tab-symtable">
+                    <div class="tab-pane" id="tab-symtable" role="tabpanel" aria-labelledby="tab-symtable-btn">
                         <div class="pane-subheading-bar">
                             <div class="pane-subheading">3. Expected Symbol table</div>
                             <button class="btn-sm btn-ghost copy-text-btn" data-target="symtable-raw-text">Copy</button>
@@ -1200,7 +1200,7 @@ input:checked + .slider:before {
                     </div>
 
                     <!-- Tab 4: Semantics -->
-                    <div class="tab-pane" id="tab-semantics">
+                    <div class="tab-pane" id="tab-semantics" role="tabpanel" aria-labelledby="tab-semantics-btn">
                         <div class="pane-subheading-bar">
                             <div class="pane-subheading">4. Expected semantic-analysis result</div>
                             <button class="btn-sm btn-ghost copy-text-btn" data-target="semantics-raw-text">Copy</button>
@@ -1228,7 +1228,7 @@ input:checked + .slider:before {
                     </div>
 
                     <!-- Tab 5: Raw TAC -->
-                    <div class="tab-pane" id="tab-raw-ir">
+                    <div class="tab-pane" id="tab-raw-ir" role="tabpanel" aria-labelledby="tab-raw-ir-btn">
                         <div class="pane-subheading-bar">
                             <div class="pane-subheading">5. Raw Three-Address Code (TAC)</div>
                             <button class="btn-sm btn-ghost copy-text-btn" data-target="ir-view">Copy</button>
@@ -1238,7 +1238,7 @@ input:checked + .slider:before {
                     </div>
 
                     <!-- Tab 6: Expected Optimized TAC -->
-                    <div class="tab-pane" id="tab-opt-ir">
+                    <div class="tab-pane" id="tab-opt-ir" role="tabpanel" aria-labelledby="tab-opt-ir-btn">
                         <div class="pane-subheading-bar">
                             <div class="pane-subheading">6. Expected optimized IR (TAC)</div>
                             <button class="btn-sm btn-ghost copy-text-btn" data-target="opt-ir-view">Copy</button>
@@ -1248,7 +1248,7 @@ input:checked + .slider:before {
                     </div>
 
                     <!-- Tab 7: Expected Optimized Behavior -->
-                    <div class="tab-pane" id="tab-opt-behavior">
+                    <div class="tab-pane" id="tab-opt-behavior" role="tabpanel" aria-labelledby="tab-opt-behavior-btn">
                         <div class="pane-subheading-bar">
                             <div class="pane-subheading">7. Expected optimized behavior</div>
                             <button class="btn-sm btn-ghost copy-text-btn" data-target="opt-behavior-text">Copy</button>
@@ -1266,7 +1266,7 @@ input:checked + .slider:before {
                     </div>
 
                     <!-- Tab 8: Output Console -->
-                    <div class="tab-pane" id="tab-console">
+                    <div class="tab-pane" id="tab-console" role="tabpanel" aria-labelledby="tab-console-btn">
                         <div class="pane-subheading-bar">
                             <div class="pane-subheading">8. Expected program output</div>
                             <button class="btn-sm btn-ghost copy-text-btn" data-target="console-output">Copy</button>
@@ -1286,7 +1286,7 @@ input:checked + .slider:before {
                             <div class="stdin-header">
                                 <span>Program Standard Input (stdin)</span>
                             </div>
-                            <textarea id="stdin-input" class="stdin-textarea" rows="2" placeholder="Optional: Enter standard input (stdin) for interactive programs here..."></textarea>
+                            <textarea id="stdin-input" class="stdin-textarea" rows="2" aria-label="Standard input for program" placeholder="Optional: Enter standard input (stdin) for interactive programs here..."></textarea>
                         </div>
                     </div>
                 </div>
