@@ -42,7 +42,14 @@ app.add_middleware(
 # Middleware to normalize Vercel serverless rewritten paths
 class VercelPathNormalizer(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # 1. Restore original matched path from Vercel rewrite headers if present
+        # 1. Check if Vercel passed the path via query parameter __path
+        query_path = request.query_params.get("__path")
+        if query_path:
+            clean_path = query_path.split("?")[0]
+            if clean_path:
+                request.scope["path"] = clean_path
+
+        # 2. Restore original matched path from Vercel rewrite headers if present
         matched = (
             request.headers.get("x-matched-path")
             or request.headers.get("x-forwarded-uri")

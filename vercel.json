@@ -1,17 +1,15 @@
 {
+  "buildCommand": "mkdir -p dist && cp index.html style.css app.js dist/",
+  "outputDirectory": "dist",
   "functions": {
     "api/index.py": {
-      "includeFiles": "src/**,backend/**,examples/**,index.html,style.css,app.js,api/**"
+      "includeFiles": "src/**,backend/**,examples/**"
     }
   },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.py"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/api/index.py"
+      "destination": "/api/index.py?__path=/api/$1"
     }
   ]
 }
