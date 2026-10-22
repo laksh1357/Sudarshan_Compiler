@@ -1411,16 +1411,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Compile code trigger
     runBtn.addEventListener("click", () => {
-        compileCode();
+        compileCode(true);
     });
 
     if (optToggle) {
         optToggle.addEventListener("change", () => {
-            compileCode();
+            compileCode(false);
         });
     }
 
-    function compileCode() {
+    function compileCode(shouldSwitchToConsole = false) {
         const code = editor.value;
         const optimize = optToggle ? optToggle.checked : true;
         runBtn.innerHTML = `<span class="btn-icon">⏳</span> Compiling...`;
@@ -1473,15 +1473,27 @@ document.addEventListener("DOMContentLoaded", () => {
             // 7. Render Execution Console Output
             try {
                 if (data.success) {
-                    consoleOutput.innerHTML = `<span class="terminal-text">${escapeHtml(data.output)}</span>`;
+                    consoleOutput.innerHTML = `<pre class="terminal-text" style="margin:0; font-family: inherit; font-size: inherit; line-height: 1.5; white-space: pre-wrap;">${escapeHtml(data.output)}</pre>`;
                 } else {
-                    consoleOutput.innerHTML = `<span style="color: #ef4444;">[Compilation Halted] Check errors banner above.</span>`;
+                    const errorDetail = (data.errors && data.errors.length > 0)
+                        ? data.errors.join("\n")
+                        : "Compilation failed.";
+                    consoleOutput.innerHTML = `<div style="color: #ef4444; font-family: var(--font-mono); white-space: pre-wrap;">[Compilation Failed]\n\n${escapeHtml(errorDetail)}</div>`;
                 }
             } catch (e) { console.error("Error rendering Console:", e); }
+
+            // If user clicked Compile & Run, or if there's an error, switch to console output tab
+            if (shouldSwitchToConsole || !data.success) {
+                activateTab("tab-console");
+            }
         })
         .catch(err => {
             runBtn.innerHTML = `<span class="btn-icon">▶</span> Compile &amp; Run`;
             showErrors([err.message || "Failed to reach compilation server."]);
+            consoleOutput.innerHTML = `<div style="color: #ef4444; font-family: var(--font-mono); white-space: pre-wrap;">[Network / Server Error]\n${escapeHtml(err.message)}</div>`;
+            if (shouldSwitchToConsole) {
+                activateTab("tab-console");
+            }
         });
     }
 

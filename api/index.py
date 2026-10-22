@@ -42,12 +42,29 @@ app.add_middleware(
 # Middleware to normalize Vercel serverless rewritten paths
 class VercelPathNormalizer(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        # 1. Restore original matched path from Vercel rewrite headers if present
+        matched = (
+            request.headers.get("x-matched-path")
+            or request.headers.get("x-forwarded-uri")
+            or request.headers.get("x-vercel-matched-path")
+        )
+        if matched:
+            raw_path = matched.split("?")[0]
+            if raw_path and raw_path != "/api/index.py":
+                request.scope["path"] = raw_path
+
         path = request.scope.get("path", "")
-        # Normalize /api/index.py, /api/index, /api, or trailing slashes to root
-        if path in ("/api/index.py", "/api/index", "/api/index.py/", "/api", "/api/"):
-            request.scope["path"] = "/"
-        elif path.startswith("/api/index.py/"):
-            request.scope["path"] = path[len("/api/index.py"):]
+        # If a POST request arrived at rewritten root or serverless file path, route to compile
+        if request.method == "POST":
+            if path in ("/", "/api", "/api/", "/api/index.py", "/api/index", "/api/index.py/", "/index.html"):
+                request.scope["path"] = "/api/compile"
+        else:
+            # Normalize /api/index.py, /api/index, /api, or trailing slashes to root for GET
+            if path in ("/api/index.py", "/api/index", "/api/index.py/", "/api", "/api/"):
+                request.scope["path"] = "/"
+            elif path.startswith("/api/index.py/"):
+                request.scope["path"] = path[len("/api/index.py"):]
+
         return await call_next(request)
 
 app.add_middleware(VercelPathNormalizer)
@@ -178,6 +195,10 @@ def get_examples():
 @app.post("/api/compile")
 @app.post("/compile")
 @app.post("/api/index.py/compile")
+@app.post("/api/index.py")
+@app.post("/api")
+@app.post("/api/")
+@app.post("/")
 async def compile_code(request: Request):
     """
     Main compilation and execution endpoint.
@@ -260,13 +281,28 @@ async def compile_code(request: Request):
     elif c_res.program_output:
         output_text = "\n".join(str(v) for v in c_res.program_output)
     else:
-        output_text = "[Program executed successfully with no output]"
+        vars_summary = []
+        if c_res.symbol_table and c_res.symbol_table.symbols:
+            for s in c_res.symbol_table.symbols:
+                vars_summary.append(f"  • {s.name} ({s.type_name})")
+        if vars_summary:
+            output_text = (
+                "[Program executed successfully]\n\n"
+                "Tracked Variables:\n" + "\n".join(vars_summary) + "\n\n"
+                "💡 Tip: Use 'print(<variable>);' to display values in the console output."
+            )
+        else:
+            output_text = "[Program executed successfully with no output]\n\n💡 Tip: Use 'print(<variable>);' to display values in the console output."
 
     # 6. Format errors
     errors = []
     for err in c_res.compilation_errors + c_res.runtime_errors:
         loc = f" (Line {err.line}, Col {err.column})" if err.line else ""
         errors.append(f"{err.error_type}: {err.message}{loc}")
+
+    if errors:
+        syntax_hint = "💡 Sudarshan syntax: 'int x = 10;' (semicolons & 'int' required), 'print(x);', 'if (cond) { }', 'while (cond) { }'"
+        errors.append(syntax_hint)
 
     is_ok = c_res.success and c_res.execution_status == "success"
 
@@ -284,7 +320,7 @@ async def compile_code(request: Request):
         "llvm_ir": c_res.raw_tac_text or "",
         "optimized_ir": c_res.optimized_tac_text or "",
         "optimized_behavior": opt_behavior,
-        "output": output_text if is_ok else f"[Compilation/Runtime Halted] {'; '.join(errors)}",
+        "output": output_text if is_ok else f"[Compilation/Runtime Halted]\n\n" + "\n".join(errors),
         "errors": errors
     })
 
