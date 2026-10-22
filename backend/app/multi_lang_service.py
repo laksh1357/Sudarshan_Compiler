@@ -541,12 +541,12 @@ def execute_multi_lang(lang: str, code: str, stdin: str = "", optimize: bool = T
 
     analysis = analyze_code_structure(lang, code, optimize)
 
-    # Compile options
+    # Compile options (Wandbox expects newline-separated compiler options)
     compiler_opts = "-O2" if optimize else "-O0"
-    if lang in ("cpp",):
-        compiler_opts = "-std=c++20 -O2" if optimize else "-std=c++20 -O0"
-    elif lang in ("c",):
-        compiler_opts = "-std=c17 -O2" if optimize else "-std=c17 -O0"
+    if lang == "cpp":
+        compiler_opts = "-O2\n-std=c++20" if optimize else "-O0\n-std=c++20"
+    elif lang == "c":
+        compiler_opts = "-O2\n-std=c17" if optimize else "-O0\n-std=c17"
 
     # Attempt 1: Wandbox API
     wandbox_res = None
