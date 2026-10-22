@@ -5,7 +5,7 @@ Entry point for local development and Vercel serverless execution.
 
 import sys
 import os
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 # Setup import paths
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
