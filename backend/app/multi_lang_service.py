@@ -548,13 +548,19 @@ def execute_multi_lang(lang: str, code: str, stdin: str = "", optimize: bool = T
     elif lang == "c":
         compiler_opts = "-O2\n-std=c17" if optimize else "-O0\n-std=c17"
 
+    # Prepare execution code (Java in Wandbox uses prog.java, so strip 'public' from class)
+    exec_code = code
+    if lang == "java":
+        import re
+        exec_code = re.sub(r"\bpublic\s+class\b", "class", code)
+
     # Attempt 1: Wandbox API
     wandbox_res = None
     if compiler_id:
-        wandbox_res = _execute_wandbox(compiler_id, code, stdin, compiler_options=compiler_opts)
+        wandbox_res = _execute_wandbox(compiler_id, exec_code, stdin, compiler_options=compiler_opts)
         # Try fallback compiler if available
         if wandbox_res is None and lang_info.get("wandbox_fallback_compiler"):
-            wandbox_res = _execute_wandbox(lang_info["wandbox_fallback_compiler"], code, stdin)
+            wandbox_res = _execute_wandbox(lang_info["wandbox_fallback_compiler"], exec_code, stdin)
 
     # Attempt 2: Local fallback execution if Wandbox is unreachable
     if wandbox_res is None:
