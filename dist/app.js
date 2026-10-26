@@ -61,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
             defaultCode: `# Python 3 - Interactive Execution\ndef fibonacci(n):\n    seq = [0, 1]\n    for _ in range(2, n):\n        seq.append(seq[-1] + seq[-2])\n    return seq\n\nprint("=== Python 3 Fibonacci Generator ===")\nprint("First 10 numbers:", fibonacci(10))\n`,
             runtimeTitle: "python3 main.py",
             presets: {
+                "interactive_input.py": "interactive_input.py (User Input stdin Demo)",
                 "fibonacci.py": "fibonacci.py (Fibonacci Generator)",
                 "primes.py": "primes.py (Sieve of Eratosthenes)",
                 "quicksort.py": "quicksort.py (Recursive Quicksort)",
@@ -77,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
             defaultCode: `#include <stdio.h>\n\nint main(void) {\n    printf("=== C (GCC 13) Execution ===\\n");\n    int sum = 0;\n    for (int i = 1; i <= 10; i++) {\n        sum += i;\n    }\n    printf("Sum of 1..10 = %d\\n", sum);\n    return 0;\n}\n`,
             runtimeTitle: "gcc -O2 main.c && ./a.out",
             presets: {
+                "interactive_scanf.c": "interactive_scanf.c (scanf Stdin Demo)",
                 "hello.c": "hello.c (Loop & Standard I/O)",
                 "pointers.c": "pointers.c (Pointer Swap)",
                 "bubble_sort.c": "bubble_sort.c (Bubble Sort Array)",
@@ -93,6 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
             defaultCode: `#include <iostream>\n#include <vector>\n#include <numeric>\n\nint main() {\n    std::cout << "=== C++20 Standard Library Demo ===\\n";\n    std::vector<int> numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};\n    int sum = std::accumulate(numbers.begin(), numbers.end(), 0);\n    std::cout << "Sum: " << sum << "\\n";\n    return 0;\n}\n`,
             runtimeTitle: "g++ -O2 -std=c++20 main.cpp && ./a.out",
             presets: {
+                "interactive_cin.cpp": "interactive_cin.cpp (std::cin Stdin Demo)",
                 "vectors.cpp": "vectors.cpp (STL Vectors & Sum)",
                 "templates.cpp": "templates.cpp (Generic Templates)",
                 "custom": "✏️ Custom Program"
@@ -108,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
             defaultCode: `public class Main {\n    public static long factorial(int n) {\n        long result = 1;\n        for (int i = 2; i <= n; i++) result *= i;\n        return result;\n    }\n\n    public static void main(String[] args) {\n        System.out.println("=== Java 21 Execution ===");\n        int num = 8;\n        System.out.println("Factorial of " + num + " = " + factorial(num));\n    }\n}\n`,
             runtimeTitle: "javac Main.java && java Main",
             presets: {
+                "InteractiveScanner.java": "InteractiveScanner.java (Scanner Stdin Demo)",
                 "Factorial.java": "Factorial.java (Factorial Calculation)",
                 "BinarySearch.java": "BinarySearch.java (Binary Search Algorithm)",
                 "custom": "✏️ Custom Program"
@@ -123,6 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
             defaultCode: `function findPrimes(limit) {\n    const primes = [];\n    for (let i = 2; i <= limit; i++) {\n        let isPrime = true;\n        for (let j = 2; j * j <= i; j++) {\n            if (i % j === 0) { isPrime = false; break; }\n        }\n        if (isPrime) primes.push(i);\n    }\n    return primes;\n}\n\nconsole.log("=== Node.js Execution ===");\nconsole.log("Primes up to 40:", findPrimes(40));\n`,
             runtimeTitle: "node index.js",
             presets: {
+                "interactive_input.js": "interactive_input.js (fs.readFileSync Stdin Demo)",
                 "primes.js": "primes.js (Primes Sieve)",
                 "async.js": "async.js (Async/Await Promises)",
                 "custom": "✏️ Custom Program"
@@ -138,6 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
             defaultCode: `interface CompilerConfig {\n    name: string;\n    version: string;\n    strict: boolean;\n    targets: string[];\n}\n\nfunction printSummary(config: CompilerConfig): void {\n    console.log(\`[\${config.name} v\${config.version}]\`);\n    console.log(\`Strict mode: \${config.strict}\`);\n    console.log(\`Targets: \${config.targets.join(", ")}\`);\n}\n\nconst studioConfig: CompilerConfig = {\n    name: "Sudarshan Studio",\n    version: "2.0.0",\n    strict: true,\n    targets: ["Python", "C", "C++", "Java", "JavaScript", "TypeScript", "Sudarshan"]\n};\n\nprintSummary(studioConfig);\n`,
             runtimeTitle: "tsc index.ts && node index.js",
             presets: {
+                "interactive_input.ts": "interactive_input.ts (Stdin Demo)",
                 "interfaces.ts": "interfaces.ts (Interfaces & Config)",
                 "custom": "✏️ Custom Program"
             }
@@ -274,6 +280,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const val = e.target.value;
         if (val === "custom") return;
 
+        if (val.includes("interactive") || val.includes("scanf") || val.includes("cin") || val.includes("Scanner")) {
+            if (stdinInput && (!stdinInput.value || stdinInput.value.trim() === "")) {
+                stdinInput.value = LANGUAGE_SAMPLE_INPUTS[currentLanguage] || "42\n";
+            }
+        }
+
         if (allPresetsCatalog[currentLanguage] && allPresetsCatalog[currentLanguage][val]) {
             editor.value = allPresetsCatalog[currentLanguage][val];
             userCodeCache[currentLanguage] = editor.value;
@@ -301,6 +313,66 @@ document.addEventListener("DOMContentLoaded", () => {
         copyBtn.textContent = "Copied!";
         setTimeout(() => copyBtn.textContent = "Copy", 1500);
     });
+
+    // =========================================================================
+    // USER INPUT (STDIN) CONTROLS
+    // =========================================================================
+    const LANGUAGE_SAMPLE_INPUTS = {
+        sudarshan: "10\n20\n",
+        python: "Lakshya Singh\n21\n",
+        c: "Developer 15 27\n",
+        cpp: "Alice 12\n",
+        java: "Hero 25\n",
+        javascript: "Dev 7\n",
+        typescript: "Alex 24\n"
+    };
+
+    const userInputSection = document.getElementById("user-input-section");
+    const toggleInputBtn = document.getElementById("toggle-input-btn");
+    const collapseInputBtn = document.getElementById("collapse-input-btn");
+    const clearInputBtn = document.getElementById("clear-input-btn");
+    const sampleInputBtn = document.getElementById("sample-input-btn");
+    const consoleInputVal = document.getElementById("console-input-val");
+
+    if (sampleInputBtn) {
+        sampleInputBtn.addEventListener("click", () => {
+            if (stdinInput) {
+                stdinInput.value = LANGUAGE_SAMPLE_INPUTS[currentLanguage] || "42\n";
+                sampleInputBtn.textContent = "✓ Loaded!";
+                setTimeout(() => { sampleInputBtn.textContent = "⚡ Sample Input"; }, 1200);
+            }
+        });
+    }
+
+    if (clearInputBtn) {
+        clearInputBtn.addEventListener("click", () => {
+            if (stdinInput) {
+                stdinInput.value = "";
+                stdinInput.focus();
+            }
+        });
+    }
+
+    function toggleInputSection() {
+        if (!userInputSection) return;
+        userInputSection.classList.toggle("collapsed");
+        const isCollapsed = userInputSection.classList.contains("collapsed");
+        if (collapseInputBtn) {
+            collapseInputBtn.textContent = isCollapsed ? "▲" : "▼";
+            collapseInputBtn.setAttribute("aria-expanded", !isCollapsed);
+        }
+        if (toggleInputBtn) {
+            toggleInputBtn.classList.toggle("active", !isCollapsed);
+        }
+    }
+
+    if (collapseInputBtn) {
+        collapseInputBtn.addEventListener("click", toggleInputSection);
+    }
+
+    if (toggleInputBtn) {
+        toggleInputBtn.addEventListener("click", toggleInputSection);
+    }
 
     // Close error banner
     errorClose.addEventListener("click", () => {
@@ -394,6 +466,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const stdin = stdinInput ? stdinInput.value : "";
         const optimize = optToggle ? optToggle.checked : true;
         const lang = currentLanguage;
+
+        if (consoleInputVal) {
+            consoleInputVal.textContent = stdin.trim() ? stdin.trim().replace(/\n/g, " ↵ ") : "(none provided — enter input in User Input section)";
+        }
 
         runBtn.innerHTML = `<span class="btn-icon">⏳</span> Compiling...`;
         errorBanner.classList.add("hidden");

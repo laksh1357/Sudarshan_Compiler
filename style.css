@@ -913,7 +913,7 @@ input:checked + .slider:before {
     color: var(--text-dim);
 }
 
-/* Stdin Input Container */
+/* Stdin Input Container & Prominent User Input Section */
 .stdin-container {
     margin-top: 0.85rem;
     padding-top: 0.65rem;
@@ -948,6 +948,137 @@ input:checked + .slider:before {
 
 .stdin-textarea:focus {
     border-color: var(--primary);
+}
+
+/* Dedicated User Input (stdin) Section in Editor Pane */
+.user-input-section {
+    border-top: 1px solid var(--border-color);
+    background: rgba(10, 15, 26, 0.98);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s ease;
+}
+
+.user-input-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.45rem 0.85rem;
+    background: rgba(0, 0, 0, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    user-select: none;
+}
+
+.user-input-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.input-icon {
+    font-size: 0.85rem;
+}
+
+.input-heading {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-main);
+    letter-spacing: 0.2px;
+}
+
+.input-helper {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+}
+
+.user-input-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.btn-xs {
+    padding: 0.18rem 0.45rem;
+    font-size: 0.68rem;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-xs:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.user-input-body {
+    padding: 0.5rem 0.85rem 0.65rem;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-editor);
+}
+
+.user-input-textarea {
+    width: 100%;
+    min-height: 56px;
+    max-height: 140px;
+    height: 60px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 0.5rem 0.7rem;
+    color: #e5e7eb;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.user-input-textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--border-glow);
+}
+
+.user-input-section.collapsed .user-input-body {
+    display: none;
+}
+
+.user-input-section.collapsed {
+    background: rgba(10, 15, 26, 0.6);
+}
+
+/* Console input indicator */
+.console-input-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.75rem;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 6px;
+    margin-bottom: 0.65rem;
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+}
+
+.console-input-label {
+    color: #a5b4fc;
+    font-weight: 600;
+}
+
+.console-input-val {
+    color: var(--text-main);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Responsive Layout */

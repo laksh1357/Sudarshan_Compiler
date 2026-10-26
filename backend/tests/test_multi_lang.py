@@ -120,3 +120,31 @@ def test_sudarshan_preserved():
     assert data["success"] is True
     assert "40" in data["output"]
     assert "int" in data["symbol_table"]
+
+
+def test_python_with_user_input():
+    payload = {
+        "language": "python",
+        "code": "name = input()\nage = int(input())\nprint(f'User {name} is {age} years old')",
+        "stdin": "Lakshya\n21\n",
+        "optimize": True
+    }
+    resp = client.post("/api/compile", json=payload)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["success"] is True
+    assert "User Lakshya is 21 years old" in data["output"]
+
+
+def test_c_with_user_input():
+    payload = {
+        "language": "c",
+        "code": "#include <stdio.h>\nint main() { int a, b; if (scanf(\"%d %d\", &a, &b) == 2) printf(\"Result: %d\\n\", a * b); return 0; }\n",
+        "stdin": "6 7\n",
+        "optimize": True
+    }
+    resp = client.post("/api/compile", json=payload)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["success"] is True
+    assert "Result: 42" in data["output"]
