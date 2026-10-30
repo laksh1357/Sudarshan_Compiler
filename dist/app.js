@@ -307,9 +307,34 @@ document.addEventListener("DOMContentLoaded", () => {
         updateLineNumbers();
     });
 
+    // Cross-browser safe clipboard helper with textarea fallback
+    function safeCopyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+        } else {
+            fallbackCopy(text);
+        }
+    }
+
+    function fallbackCopy(text) {
+        try {
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.style.position = "fixed";
+            ta.style.left = "-9999px";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+        } catch (e) {
+            console.warn("Clipboard copy failed:", e);
+        }
+    }
+
     // Copy editor content
     copyBtn.addEventListener("click", () => {
-        navigator.clipboard.writeText(editor.value);
+        safeCopyToClipboard(editor.value);
         copyBtn.textContent = "Copied!";
         setTimeout(() => copyBtn.textContent = "Copy", 1500);
     });
@@ -441,7 +466,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const targetEl = document.getElementById(targetId);
             if (targetEl) {
                 const text = targetEl.value !== undefined ? targetEl.value : (targetEl.innerText || targetEl.textContent);
-                navigator.clipboard.writeText(text);
+                safeCopyToClipboard(text);
                 const orig = btn.innerHTML;
                 const isIcon = btn.classList.contains("copy-icon-btn");
                 btn.innerHTML = isIcon ? "✓" : "Copied!";

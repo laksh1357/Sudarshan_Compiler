@@ -48,6 +48,23 @@ app.add_middleware(
 )
 
 
+@app.middleware("http")
+async def check_payload_limit(request: Request, call_next):
+    """Enforces request payload size limits (max 64KB) to mitigate DOS risks."""
+    max_bytes = 65536  # 64 KB
+    content_length = request.headers.get("content-length")
+    if content_length:
+        try:
+            if int(content_length) > max_bytes:
+                return JSONResponse(
+                    status_code=413,
+                    content={"detail": "Payload too large. Source code must not exceed 64KB."}
+                )
+        except ValueError:
+            pass
+    return await call_next(request)
+
+
 # Middleware to normalize Vercel serverless rewritten paths
 class VercelPathNormalizer(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
@@ -277,7 +294,10 @@ async def compile_code(request: Request):
     try:
         body = await request.json()
     except Exception:
-        body = {}
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "Malformed JSON payload in request body."}
+        )
 
     code = body.get("code") or body.get("source_code") or ""
     language = (body.get("language") or "sudarshan").lower().strip()
@@ -289,6 +309,16 @@ async def compile_code(request: Request):
             "success": False,
             "errors": [f"Source code cannot be empty. Please enter {language.capitalize()} program code."]
         })
+
+    # Validate language
+    if language != "sudarshan" and language not in LANGUAGE_CONFIGS:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "success": False,
+                "detail": f"Unsupported language '{language}'. Supported: {list(LANGUAGE_CONFIGS.keys()) + ['sudarshan']}"
+            }
+        )
 
     # Dispatch to multi-language runner if not Sudarshan
     if language != "sudarshan" and language in LANGUAGE_CONFIGS:
@@ -415,6 +445,11 @@ async def compile_code(request: Request):
         "llvm_ir": c_res.raw_tac_text or "",
         "optimized_ir": c_res.optimized_tac_text or "",
         "optimized_behavior": opt_behavior,
+        "cfg_dot": c_res.cfg_dot or "",
+        "cfg_summary": c_res.cfg_summary or "",
+        "ssa_ir": c_res.ssa_tac_text or "",
+        "live_vars": c_res.dataflow_live_vars or "",
+        "reaching_defs": c_res.dataflow_reaching_defs or "",
         "output": output_text if is_ok else f"[Compilation/Runtime Halted]\n\n" + "\n".join(errors),
         "errors": errors
     })
@@ -440,6 +475,8 @@ def catch_all(full_path: str):
         return health()
     if clean in ("api/presets", "presets"):
         return get_presets()
+    if clean.startswith("api/"):
+        return JSONResponse(status_code=404, content={"detail": f"API endpoint '/{clean}' not found."})
     return serve_index()
 
 

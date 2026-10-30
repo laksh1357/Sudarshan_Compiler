@@ -51,7 +51,7 @@ async def check_payload_limit(request: Request, call_next):
         try:
             if int(content_length) > max_bytes:
                 return JSONResponse(
-                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                    status_code=413,
                     content={"detail": "Payload too large. Source code must not exceed 64KB."}
                 )
         except ValueError:

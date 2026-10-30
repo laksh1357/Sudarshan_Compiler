@@ -127,6 +127,13 @@ class CompilationResponse(BaseModel):
     compilation_errors: List[CompilerErrorModel] = Field(default_factory=list)
     timing: TimingModel = Field(default_factory=TimingModel)
 
+    # Advanced Analysis & Optimization fields
+    cfg_dot: Optional[str] = None
+    cfg_summary: Optional[str] = None
+    ssa_tac_text: Optional[str] = None
+    dataflow_live_vars: Optional[str] = None
+    dataflow_reaching_defs: Optional[str] = None
+
     # Execution fields (populated for compile-run and run)
     execution_status: Optional[str] = None  # "success" | "error" | "step_limit_exceeded" | None
     program_output: Optional[List[int]] = None

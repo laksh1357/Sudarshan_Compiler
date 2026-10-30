@@ -327,6 +327,32 @@ def compile_sudarshan(
         ))
         return resp
 
+    # ==========================================
+    # Phase 4c: Advanced Program Analysis (CFG, SSA, Data Flow)
+    # ==========================================
+    try:
+        from analysis.cfg_advanced import build_cfg, cfg_to_dot, cfg_summary
+        from analysis.ssa import build_ssa
+        from analysis.dataflow import LiveVariableAnalysis, ReachingDefinitionsAnalysis
+
+        cfg_obj = build_cfg(raw_tac)
+        resp.cfg_dot = cfg_to_dot(cfg_obj)
+        resp.cfg_summary = cfg_summary(cfg_obj)
+
+        ssa_prog = build_ssa(raw_tac)
+        resp.ssa_tac_text = dump_tac(ssa_prog.to_tac())
+
+        liveness = LiveVariableAnalysis(cfg_obj)
+        liveness.analyse()
+        resp.dataflow_live_vars = liveness.format_report()
+
+        rdefs = ReachingDefinitionsAnalysis(cfg_obj)
+        rdefs.analyse()
+        resp.dataflow_reaching_defs = rdefs.format_report()
+    except Exception:
+        # Non-fatal diagnostic pass
+        pass
+
     # Compilation succeeded through all IR stages
     resp.success = True
 

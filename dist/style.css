@@ -1477,3 +1477,31 @@ input:checked + .slider:before {
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+
+@media (max-width: 640px) {
+    .navbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .nav-actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 0.4rem;
+    }
+
+    .editor-toolbar {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .modal-card {
+        max-width: 95vw;
+        margin: 0 auto;
+    }
+
+    .modal-body {
+        padding: 0.75rem;
+    }
+}
